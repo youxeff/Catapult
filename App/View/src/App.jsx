@@ -35,13 +35,13 @@ function App() {
             },
             {
               id: 'tech-002',
-              image: 'https://via.placeholder.com/200',
-              name: 'Wireless Earbuds',
-              priceRange: '$ 29.99 - $ 35.99',
-              trendScore: 88,
+              image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MQD83?wid=1144&hei=1144&fmt=jpeg&qlt=95&.v=1660803972361',
+              name: 'AirPods Pro (2nd Gen)',
+              priceRange: '$ 249.99',
+              trendScore: 95,
               categoryId: 'electronics',
-              price: 29.99,
-              description: 'Premium wireless earbuds with noise cancellation'
+              price: 249.99,
+              description: 'AirPods Pro (2nd generation) with USB-C charging case'
             },
             {
               id: 'home-001',
