@@ -9,6 +9,7 @@ import './App.css'
 
 function App() {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -70,9 +71,31 @@ function App() {
     fetchProducts();
   }, []);
 
-  const handleSort = (sortType) => {
-    setActiveSort(sortType);
-    const sortedProducts = [...products].sort((a, b) => {
+  const handleSearch = ({ searchTerm, category }) => {
+    if (!products.length) return;
+
+    let results = [...products];
+
+    // Filter by search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      results = results.filter(product => 
+        product.name.toLowerCase().includes(term) ||
+        product.description.toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by category
+    if (category && category !== 'all') {
+      results = results.filter(product => product.categoryId === category);
+    }
+
+    // Apply current sort
+    sortProducts(results, activeSort);
+  };
+
+  const sortProducts = (productsToSort, sortType) => {
+    const sorted = [...productsToSort].sort((a, b) => {
       switch (sortType) {
         case 'trending':
           return b.trendScore - a.trendScore;
@@ -84,8 +107,18 @@ function App() {
           return 0;
       }
     });
-    setProducts(sortedProducts);
+    setFilteredProducts(sorted);
   };
+
+  const handleSort = (sortType) => {
+    setActiveSort(sortType);
+    sortProducts(filteredProducts, sortType);
+  };
+
+  // Initialize filtered products
+  useEffect(() => {
+    setFilteredProducts(products);
+  }, [products]);
 
   const handleScroll = (direction) => {
     if (!gridRef.current) return;
@@ -128,7 +161,7 @@ function App() {
       <div className="min-h-screen bg-background text-foreground transition-colors">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <ThemeToggle />
-          <SearchBar onSearch={handleSort} />
+          <SearchBar onSearch={handleSearch} />
           <div className="flex justify-between items-center my-8">
             <h2 className="text-6xl font-bold text-foreground">Top Picks</h2>
             {lastUpdated && (
@@ -141,7 +174,7 @@ function App() {
           <div className="relative mt-6">
             <div className="overflow-x-auto" ref={gridRef}>
               <div className="flex gap-6 pb-6">
-                <ProductGrid products={products} loading={loading} />
+                <ProductGrid products={filteredProducts} loading={loading} />
               </div>
             </div>
             <GridNavigation 
