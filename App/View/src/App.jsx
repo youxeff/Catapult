@@ -3,6 +3,8 @@ import SearchBar from './components/SearchBar'
 import ProductGrid from './components/ProductGrid'
 import SortControls from './components/SortControls'
 import GridNavigation from './components/GridNavigation'
+import ThemeToggle from './components/ThemeToggle'
+import { ThemeProvider } from './context/ThemeContext'
 import './App.css'
 
 function App() {
@@ -117,27 +119,30 @@ function App() {
   }, [products]);
 
   return (
-    <div className="app">
-      <SearchBar onSearch={handleSort} />
-      <div className="section-header">
-        <h2 className="section-title">Top Picks</h2>
-        {lastUpdated && (
-          <span className="last-updated">Last Updated: {lastUpdated}</span>
-        )}
-      </div>
-      <SortControls onSort={handleSort} activeSort={activeSort} />
-      <div className="product-grid-container">
-        <div className="product-grid" ref={gridRef}>
-          <ProductGrid products={products} loading={loading} />
+    <ThemeProvider>
+      <div className="app">
+        <ThemeToggle />
+        <SearchBar onSearch={handleSort} />
+        <div className="section-header">
+          <h2 className="section-title">Top Picks</h2>
+          {lastUpdated && (
+            <span className="last-updated">Last Updated: {lastUpdated}</span>
+          )}
         </div>
+        <SortControls onSort={handleSort} activeSort={activeSort} />
+        <div className="product-grid-container">
+          <div className="product-grid" ref={gridRef}>
+            <ProductGrid products={products} loading={loading} />
+          </div>
+        </div>
+        <GridNavigation 
+          onScrollLeft={() => handleScroll('left')}
+          onScrollRight={() => handleScroll('right')}
+          canScrollLeft={canScroll.left}
+          canScrollRight={canScroll.right}
+        />
       </div>
-      <GridNavigation 
-        onScrollLeft={() => handleScroll('left')}
-        onScrollRight={() => handleScroll('right')}
-        canScrollLeft={canScroll.left}
-        canScrollRight={canScroll.right}
-      />
-    </div>
+    </ThemeProvider>
   )
 }
 
