@@ -30,7 +30,8 @@ function App() {
               priceRange: '$ 4.05 - $ 5.00',
               trendScore: 92,
               categoryId: 'electronics',
-              price: 4.05
+              price: 4.05,
+              description: 'High-speed charging adapter compatible with most devices'
             },
             {
               id: 'tech-002',
@@ -38,7 +39,9 @@ function App() {
               name: 'Wireless Earbuds',
               priceRange: '$ 29.99 - $ 35.99',
               trendScore: 88,
-              categoryId: 'electronics'
+              categoryId: 'electronics',
+              price: 29.99,
+              description: 'Premium wireless earbuds with noise cancellation'
             },
             {
               id: 'home-001',
@@ -46,7 +49,9 @@ function App() {
               name: 'Smart LED Bulb',
               priceRange: '$ 15.99 - $ 19.99',
               trendScore: 85,
-              categoryId: 'home'
+              categoryId: 'home',
+              price: 15.99,
+              description: 'WiFi-enabled smart LED bulb with millions of colors'
             }
           ],
           lastUpdated: new Date().toLocaleDateString()
@@ -120,27 +125,33 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="app">
-        <ThemeToggle />
-        <SearchBar onSearch={handleSort} />
-        <div className="section-header">
-          <h2 className="section-title">Top Picks</h2>
-          {lastUpdated && (
-            <span className="last-updated">Last Updated: {lastUpdated}</span>
-          )}
-        </div>
-        <SortControls onSort={handleSort} activeSort={activeSort} />
-        <div className="product-grid-container">
-          <div className="product-grid" ref={gridRef}>
-            <ProductGrid products={products} loading={loading} />
+      <div className="min-h-screen bg-background text-foreground transition-colors">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <ThemeToggle />
+          <SearchBar onSearch={handleSort} />
+          <div className="flex justify-between items-center my-8">
+            <h2 className="text-2xl font-bold text-foreground">Top Picks</h2>
+            {lastUpdated && (
+              <span className="text-sm text-muted-foreground">
+                Last Updated: {lastUpdated}
+              </span>
+            )}
+          </div>
+          <SortControls onSort={handleSort} activeSort={activeSort} />
+          <div className="relative mt-6">
+            <div className="overflow-x-auto" ref={gridRef}>
+              <div className="flex gap-6 pb-6">
+                <ProductGrid products={products} loading={loading} />
+              </div>
+            </div>
+            <GridNavigation 
+              onScrollLeft={() => handleScroll('left')}
+              onScrollRight={() => handleScroll('right')}
+              canScrollLeft={canScroll.left}
+              canScrollRight={canScroll.right}
+            />
           </div>
         </div>
-        <GridNavigation 
-          onScrollLeft={() => handleScroll('left')}
-          onScrollRight={() => handleScroll('right')}
-          canScrollLeft={canScroll.left}
-          canScrollRight={canScroll.right}
-        />
       </div>
     </ThemeProvider>
   )

@@ -19,9 +19,9 @@ const ProductGrid = ({ products, loading }) => {
 
   return (
     <>
-      {products.map((product, index) => (
+      {products.map((product) => (
         <ProductCard
-          key={product.id || index}
+          key={product.id}
           {...product}
         />
       ))}

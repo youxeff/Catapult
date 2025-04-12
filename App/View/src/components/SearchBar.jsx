@@ -54,10 +54,10 @@ const SearchBar = ({ onSearch }) => {
   };
 
   return (
-    <div className={`search-container ${isExpanded ? 'expanded' : ''}`}>
-      <div className="search-bar">
-        <div className="search-input-container">
-          <span className="search-icon">🔍</span>
+    <div className={`max-w-2xl mx-auto p-4 ${isExpanded ? 'expanded' : ''}`}>
+      <div className="flex gap-2 bg-card border border-border rounded-lg p-2">
+        <div className="flex-1 flex items-center gap-2">
+          <span className="text-muted-foreground">🔍</span>
           <input
             type="text"
             placeholder="Search products..."
@@ -65,22 +65,26 @@ const SearchBar = ({ onSearch }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
+            className="flex-1 bg-transparent border-none focus:outline-none text-foreground placeholder:text-muted-foreground"
           />
         </div>
         <button 
-          className="category-button"
+          className="px-3 py-1 bg-muted text-muted-foreground rounded flex items-center gap-1 hover:bg-muted/80 transition-colors"
           onClick={toggleCategories}
         >
           {selectedCategory === 'all' ? 'All Categories' : 
             categories.find(c => c.id === selectedCategory)?.name}
-          <span className={`arrow ${showCategories ? 'up' : 'down'}`}>▼</span>
+          <span className={`transition-transform duration-200 ${showCategories ? 'rotate-180' : ''}`}>
+            ▼
+          </span>
         </button>
       </div>
       
       {showCategories && (
-        <div className="categories-dropdown">
+        <div className="mt-2 bg-card border border-border rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
           <div 
-            className={`category-item ${selectedCategory === 'all' ? 'selected' : ''}`}
+            className={`p-2 cursor-pointer hover:bg-muted transition-colors
+              ${selectedCategory === 'all' ? 'bg-primary text-primary-foreground' : ''}`}
             onClick={() => selectCategory('all')}
           >
             All Categories
@@ -88,7 +92,8 @@ const SearchBar = ({ onSearch }) => {
           {categories.map(category => (
             <div
               key={category.id}
-              className={`category-item ${selectedCategory === category.id ? 'selected' : ''}`}
+              className={`p-2 cursor-pointer hover:bg-muted transition-colors
+                ${selectedCategory === category.id ? 'bg-primary text-primary-foreground' : ''}`}
               onClick={() => selectCategory(category.id)}
             >
               {category.name}
