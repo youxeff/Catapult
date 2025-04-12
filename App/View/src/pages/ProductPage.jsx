@@ -44,14 +44,19 @@ const ProductPage = () => {
               <p className="text-primary text-xl mb-6">{product.priceRange}</p>
               {product.trendScore && (
                 <div className="mt-4">
-                  <span className="text-muted-foreground block mb-2">
-                    Trend Score: {product.trendScore}%
-                  </span>
-                  <div className="w-full h-2 bg-muted rounded-full">
-                    <div 
-                      className="h-full bg-primary rounded-full transition-all duration-300"
-                      style={{ width: `${product.trendScore}%` }}
-                    />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <span className="text-muted-foreground block mb-2">Trend Score</span>
+                      <div className="w-full h-2 bg-muted rounded-full">
+                        <div 
+                          className="h-full bg-primary rounded-full transition-all duration-300"
+                          style={{ width: `${product.trendScore}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-lg text-primary font-medium whitespace-nowrap">
+                      {product.trendScore}%
+                    </span>
                   </div>
                 </div>
               )}
