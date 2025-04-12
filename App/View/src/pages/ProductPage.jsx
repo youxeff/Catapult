@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import SalesGraph from "../components/SalesGraph";
 
 const ProductPage = () => {
   const location = useLocation();
@@ -90,6 +91,7 @@ const ProductPage = () => {
               ))}
           </div>
         </div>
+        <SalesGraph/>
       </div>
     </div>
   );
