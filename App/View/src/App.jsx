@@ -32,7 +32,8 @@ function App() {
               trendScore: 92,
               categoryId: 'electronics',
               price: 4.05,
-              description: 'High-speed charging adapter compatible with most devices'
+              description: 'High-speed charging adapter compatible with most devices',
+              sellers: ['Best Buy', 'Amazon', 'Walmart'],
             },
             {
               id: 'tech-002',
@@ -42,7 +43,8 @@ function App() {
               trendScore: 95,
               categoryId: 'electronics',
               price: 249.99,
-              description: 'AirPods Pro (2nd generation) with USB-C charging case'
+              description: 'AirPods Pro (2nd generation) with USB-C charging case',
+              sellers: ['Apple Store', 'Amazon', 'Best Buy'],
             },
             {
               id: 'home-001',
@@ -52,7 +54,8 @@ function App() {
               trendScore: 85,
               categoryId: 'home',
               price: 15.99,
-              description: 'Full-color smart LED bulb with millions of colors and Wi-Fi connectivity'
+              description: 'Full-color smart LED bulb with millions of colors and Wi-Fi connectivity',
+              sellers: ['Home Depot', 'Lowe\'s', 'Amazon'],
             }
           ],
           lastUpdated: new Date().toLocaleDateString()

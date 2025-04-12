@@ -1,7 +1,31 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 
-const ListingCard = ({ product }) => {
-  const { name, price, image, description } = product;
+const ListingCard = ({ product_id, seller }) => {
+  const [loading, setLoading] = useState(true);
+  const [productDetails, setProductDetails] = useState(null);
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        const response = await fetch(`https://api.example.com/products/${product_id}:${seller}`);
+        const data = await response.json();
+        setProductDetails(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [product_id, seller]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  const { name, description, price, image } = productDetails;
 
   return (
     <div className="listing-card" style={styles.card}>

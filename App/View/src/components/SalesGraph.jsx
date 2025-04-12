@@ -30,7 +30,7 @@ const SalesGraph = () => {
         <XAxis dataKey="x" />
         <YAxis />
         <Tooltip />
-        <Line type="monotone" dataKey="y" stroke="#8884d8" strokeWidth={2} />
+        <Line type="linear" dataKey="y" stroke="#8884d8" strokeWidth={2} />
 
         {/* Vertical Dotted Lines */}
         {verticalLines.map((xValue, index) => (

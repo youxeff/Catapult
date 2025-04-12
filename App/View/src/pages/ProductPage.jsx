@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import SalesGraph from "../components/SalesGraph";
+import ListingCard from "../components/ListingCard";
 
 const ProductPage = () => {
   const location = useLocation();
@@ -11,9 +12,11 @@ const ProductPage = () => {
     name: "Sample Product",
     description: "This is a detailed description of the product.",
     priceRange: "$0.00 - $0.00",
-    image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.gelighting.com%2Fsmart-home%2Fled-bulbs%2Ffull-color&psig=AOvVaw3ANa-TiFyKBYfYDvxAY3LB&ust=1744580511777000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCJiSvIC704wDFQAAAAAdAAAAABAR",
+    image:
+      "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.gelighting.com%2Fsmart-home%2Fled-bulbs%2Ffull-color&psig=AOvVaw3ANa-TiFyKBYfYDvxAY3LB&ust=1744580511777000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCJiSvIC704wDFQAAAAAdAAAAABAR",
     trendScore: 0,
     category: "Category",
+    sellers: ["Seller Name"],
   };
 
   return (
@@ -70,7 +73,7 @@ const ProductPage = () => {
             Similar Products
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array(4)
+            {Array(product.sellers ? product.sellers.length : 4)
               .fill({ ...product, id: undefined })
               .map((item, index) => (
                 <div
@@ -87,11 +90,12 @@ const ProductPage = () => {
                     {item.name}
                   </h3>
                   <p className="text-primary">{item.priceRange}</p>
+                  <p className="text-muted-foreground mt-2">{item.sellers[index]}</p>
                 </div>
               ))}
           </div>
         </div>
-        <SalesGraph/>
+        <SalesGraph />
       </div>
     </div>
   );

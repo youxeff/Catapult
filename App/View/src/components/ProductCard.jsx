@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ id, image, name, priceRange, trendScore, lastUpdated }) => {
+const ProductCard = ({ id, image, name, priceRange, trendScore, lastUpdated, sellers }) => {
   const navigate = useNavigate();
   
   if (!name) return null;
@@ -14,7 +14,8 @@ const ProductCard = ({ id, image, name, priceRange, trendScore, lastUpdated }) =
         name, 
         priceRange, 
         trendScore, 
-        lastUpdated
+        lastUpdated,
+        sellers
       } 
     });
   };
