@@ -26,8 +26,8 @@ const ProductPage = () => {
         </div>
         
         <div style={{ marginTop: "20px", overflowX: "auto", whiteSpace: "nowrap", borderRadius: "10px", backgroundColor: "#1a1a1a", padding: "10px" }}>
-        <div style={{ fontSize: 20, textAlign:"left", paddingLeft: "10px", color: "#fff" }}>Listings</div>
-          {Array(10).fill(product).map((item, index) => (
+        <div style={{ fontSize: 20, textAlign:"left", paddingLeft: "10px" }}>Listings</div>
+          {Array(5).fill(product).map((item, index) => (
             <div
               key={index}
               style={{
@@ -44,7 +44,7 @@ const ProductPage = () => {
               <img
           src={item.image}
           alt={item.name}
-          style={{ width: "100%", borderRadius: "10px", marginBottom: "10px" }}
+          style={{ width: "100%", maxWidth: "100px", borderRadius: "10px", marginBottom: "10px" }}
               />
               <div style={{ fontSize: "18px", fontWeight: "bold" }}>{item.name}</div>
               <div style={{ fontSize: "14px", color: "#ccc" }}>${item.price.toFixed(2)}</div>
