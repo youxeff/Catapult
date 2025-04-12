@@ -11,7 +11,7 @@ const ProductPage = () => {
     name: "Sample Product",
     description: "This is a detailed description of the product.",
     priceRange: "$0.00 - $0.00",
-    image: "https://via.placeholder.com/300",
+    image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.gelighting.com%2Fsmart-home%2Fled-bulbs%2Ffull-color&psig=AOvVaw3ANa-TiFyKBYfYDvxAY3LB&ust=1744580511777000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCJiSvIC704wDFQAAAAAdAAAAABAR",
     trendScore: 0,
     category: "Category",
   };

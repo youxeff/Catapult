@@ -45,13 +45,13 @@ function App() {
             },
             {
               id: 'home-001',
-              image: 'https://via.placeholder.com/200',
-              name: 'Smart LED Bulb',
+              image: 'https://www.gelighting.com/sites/default/files/styles/x_small_hq/public/image/2023-05/Dynamic%20Effects%20Products%20Smart%20Bulb.png?itok=zK9XACcq',
+              name: 'GE Smart LED Bulb',
               priceRange: '$ 15.99 - $ 19.99',
               trendScore: 85,
               categoryId: 'home',
               price: 15.99,
-              description: 'WiFi-enabled smart LED bulb with millions of colors'
+              description: 'Full-color smart LED bulb with millions of colors and Wi-Fi connectivity'
             }
           ],
           lastUpdated: new Date().toLocaleDateString()
@@ -130,7 +130,7 @@ function App() {
           <ThemeToggle />
           <SearchBar onSearch={handleSort} />
           <div className="flex justify-between items-center my-8">
-            <h2 className="text-2xl font-bold text-foreground">Top Picks</h2>
+            <h2 className="text-6xl font-bold text-foreground">Top Picks</h2>
             {lastUpdated && (
               <span className="text-sm text-muted-foreground">
                 Last Updated: {lastUpdated}
