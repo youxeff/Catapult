@@ -1,44 +1,44 @@
-from pytrends.request import TrendReq
 import requests
 import os
 from dotenv import load_dotenv
 
+# Load SERPAPI key
 load_dotenv()
-EXPLODING_API_KEY = os.getenv("EXPLODING_TOPICS_API_KEY")
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")  # Or hardcode it
 
+def get_related_google_trends(query, api_key=SERPAPI_KEY, max_results=10):
+    try:
+        url = "https://serpapi.com/search.json"
+        params = {
+            "engine": "google_trends",
+            "q": query,
+            "api_key": api_key
+        }
 
-def get_trend_keywords(keyword: str, max_results=10):
-    trend_data = {
-        "google": [],
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+        # Safely extract related queries
+        related = data.get("related_queries", [])
+        keywords = [item.get("query") for item in related if "query" in item]
+
+        return keywords[:max_results]
+
+    except Exception as e:
+        print(f"[SerpAPI Error] {e}")
+        return []
+
+def get_trend_keywords_from_serpapi(user_query, max_results=10):
+    return {
+        "google": get_related_google_trends(user_query, max_results=max_results),
         "exploding": [],
-        "tiktok": []  # Placeholder for future TikTok integration
+        "tiktok": []
     }
 
-    # 1. Google Trends
-    try:
-        pytrends = TrendReq(hl='en-US', tz=360)
-        pytrends.build_payload([keyword], timeframe="now 7-d")
-        rising = pytrends.related_queries().get(keyword, {}).get("rising")
-        if rising is not None:
-            trend_data["google"] = rising["query"].tolist()[:max_results]
-    except Exception as e:
-        print(f"[Google Trends Error] {e}")
-
-    # 2. Exploding Topics
-    try:
-        url = "https://api.explodingtopics.com/v1/trending"
-        headers = {"Authorization": f"Bearer {EXPLODING_API_KEY}"}
-        response = requests.get(url, headers=headers)
-        topics = response.json().get("trends", [])
-
-        count = 0
-        for topic in topics:
-            if count >= max_results:
-                break
-            if keyword.lower() in topic["topic"].lower() or keyword.lower() in topic.get("description", "").lower():
-                trend_data["exploding"].append(topic["topic"])
-                count += 1
-    except Exception as e:
-        print(f"[Exploding Topics Error] {e}")
-
-    return trend_data
+# === Test Run ===
+if __name__ == "__main__":
+    test_query = "health care product"
+    trend_data = get_trend_keywords_from_serpapi(test_query)
+    print("\n📊 Final Trend Output:")
+    print(trend_data)
