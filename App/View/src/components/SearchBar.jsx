@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import $ from 'jquery';
 
 const categories = [
   { id: 'electronics', name: 'Electronics' },
@@ -26,35 +27,42 @@ const categories = [
 const SearchBar = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isExpanded, setIsExpanded] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Trigger search when debounced search term or category changes
+  useEffect(() => {
+    handleSearch();
+  }, [debouncedSearchTerm, selectedCategory]);
 
   const handleSearch = () => {
-    onSearch({ searchTerm, category: selectedCategory });
+    onSearch({
+      searchTerm: debouncedSearchTerm,
+      category: selectedCategory
+    });
   };
 
-  const handleInputFocus = () => {
-    setIsExpanded(true);
-  };
-
-  const handleInputBlur = () => {
-    if (!showCategories) {
-      setIsExpanded(false);
-    }
-  };
-
-  const toggleCategories = () => {
-    setShowCategories(!showCategories);
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
   };
 
   const selectCategory = (categoryId) => {
     setSelectedCategory(categoryId);
     setShowCategories(false);
-    if (!searchTerm) setIsExpanded(false);
   };
 
   return (
-    <div className={`max-w-2xl mx-auto p-4 ${isExpanded ? 'expanded' : ''}`}>
+    <div className="max-w-2xl mx-auto p-4">
       <div className="flex gap-2 bg-card border border-border rounded-lg p-2">
         <div className="flex-1 flex items-center gap-2">
           <span className="text-muted-foreground">🔍</span>
@@ -62,15 +70,13 @@ const SearchBar = ({ onSearch }) => {
             type="text"
             placeholder="Search products..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
+            onChange={handleInputChange}
             className="flex-1 bg-transparent border-none focus:outline-none text-foreground placeholder:text-muted-foreground"
           />
         </div>
         <button 
           className="px-3 py-1 bg-muted text-muted-foreground rounded flex items-center gap-1 hover:bg-muted/80 transition-colors"
-          onClick={toggleCategories}
+          onClick={() => setShowCategories(!showCategories)}
         >
           {selectedCategory === 'all' ? 'All Categories' : 
             categories.find(c => c.id === selectedCategory)?.name}
