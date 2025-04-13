@@ -1,4 +1,4 @@
-# seo_opportunity_engine.py (Updated for openai>=1.0.0 with debug prints)
+# seo_opportunity_engine.py (Uses LLM to simulate keyword metrics instead of SEO API)
 
 # --- Imports ---
 from openai import OpenAI
@@ -6,43 +6,84 @@ import networkx as nx
 from collections import defaultdict
 from sklearn.cluster import DBSCAN
 from sentence_transformers import SentenceTransformer
+import json
 import os
+from dotenv import load_dotenv
+import re
 
-# --- Embedding Model ---
+# --- Setup ---
+load_dotenv()
 model = SentenceTransformer('all-MiniLM-L6-v2')
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # Uses environment variable OPENAI_API_KEY or a .env file
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 1. Sector Extraction using LLM (OpenAI >= 1.0.0)
+# 1. Sector Extraction using LLM
 def extract_sectors(user_query: str) -> list:
     print("\n[Step 1] Extracting sectors from user query...")
-    prompt = f"Break down the query '{user_query}' into 4-6 specific product or topic sectors."
+    prompt = f"""
+You are a domain categorization assistant. Your task is to break down the following query into 4-6 distinct and specific product or topic sectors.
+
+Query: "{user_query}"
+
+Return the sectors as a raw JSON array of strings. Do not include any extra text or explanations. Example format:
+["Sector A", "Sector B", "Sector C", "Sector D"]
+"""
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}]
     )
-    text = response.choices[0].message.content
-    sectors = [s.strip("- ") for s in text.split("\n") if s.strip()]
-    print(f"Extracted Sectors: {sectors}")
-    return sectors
+    text = response.choices[0].message.content.strip()
+    try:
+        sectors = json.loads(text)
+        print(f"Extracted Sectors: {sectors}")
+        return sectors
+    except Exception as e:
+        print(f"Failed to parse sectors as JSON: {e}\nRaw response:\n{text}")
+        return []
 
-# 2. Simulated SEO Keyword Fetcher (Temp Static Data)
+# 2. Simulated Keyword Metrics using LLM
 def fetch_keywords_for_sector(sector: str) -> list:
-    print(f"\n[Step 2] Fetching keyword data for sector: {sector}")
-    temp_data = {
-        "Diapers": [
-            {"keyword": "eco-friendly diapers", "volume": 8800, "cpc": 2.1, "difficulty": 38, "trend": 0.4},
-            {"keyword": "cloth diapers", "volume": 9900, "cpc": 0.9, "difficulty": 67, "trend": -0.1},
-            {"keyword": "overnight diapers", "volume": 6200, "cpc": 1.85, "difficulty": 50, "trend": 0.25}
-        ],
-        "Pills": [
-            {"keyword": "vegan pills", "volume": 5000, "cpc": 1.5, "difficulty": 45, "trend": 0.2},
-            {"keyword": "pain relief pills", "volume": 8500, "cpc": 2.4, "difficulty": 62, "trend": 0.3},
-            {"keyword": "herbal pills", "volume": 7600, "cpc": 1.1, "difficulty": 40, "trend": 0.5}
-        ]
-    }
-    keywords = temp_data.get(sector, [])
-    print(f"Retrieved {len(keywords)} keywords.")
-    return keywords
+    print(f"\n[Step 2] Generating keyword data for sector: {sector}")
+    prompt = f"""
+You are an SEO assistant. Generate 5 high-potential keywords for the sector "{sector}".
+For each keyword, simulate the following metrics:
+- volume: Estimated monthly search volume (1 to 10000)
+- cpc: Cost per click (0 to 5)
+- difficulty: Ranking difficulty (0 to 100)
+- trend: Recent trend from -1 (downward) to 1 (strong upward)
+
+Return only a **valid JSON array** of keyword objects. Each object must include "keyword", "volume", "cpc", "difficulty", and "trend".
+
+Example:
+[
+  {{
+    "keyword": "example keyword",
+    "volume": 3500,
+    "cpc": 1.75,
+    "difficulty": 48,
+    "trend": 0.4
+  }},
+  ...
+]
+
+Only return the raw JSON. Do NOT add markdown, explanations, or commentary.
+"""
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    content = response.choices[0].message.content.strip()
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        match = re.search(r'\[.*\]', content, re.DOTALL)
+        if not match:
+            print(f"Failed to extract JSON array from response.\nRaw content:\n{content}")
+            return []
+        try:
+            return json.loads(match.group())
+        except Exception as e:
+            print(f"Failed to parse extracted JSON array: {e}")
+            return []
 
 # 3. Build Keyword Graph
 def build_graph(keywords: list):
@@ -52,7 +93,7 @@ def build_graph(keywords: list):
         G.add_node(kw["keyword"], **kw)
     for i, k1 in enumerate(keywords):
         for j, k2 in enumerate(keywords):
-            if i < j and any(w in k2["keyword"] for w in k1["keyword"].split()):
+            if i < j and any(w in k2["keyword"].lower() for w in k1["keyword"].lower().split()):
                 G.add_edge(k1["keyword"], k2["keyword"], weight=1.0)
     print(f"Graph has {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
     return G
@@ -61,13 +102,15 @@ def build_graph(keywords: list):
 def cluster_keywords(graph):
     print("[Step 4] Clustering keywords using semantic embeddings...")
     keywords = list(graph.nodes)
+    if len(keywords) < 2:
+        print("Not enough keywords for clustering.")
+        return {}
     embeddings = model.encode(keywords)
-    clustering = DBSCAN(eps=0.5, min_samples=2).fit(embeddings)
+    clustering = DBSCAN(eps=1.0, min_samples=1).fit(embeddings)
     labels = clustering.labels_
     clusters = defaultdict(list)
     for keyword, label in zip(keywords, labels):
-        if label != -1:
-            clusters[label].append(keyword)
+        clusters[label].append(keyword)
     print(f"Formed {len(clusters)} keyword clusters.")
     return dict(clusters)
 
@@ -85,41 +128,21 @@ def score_keyword(node_data):
     )
     return round(score, 3)
 
-# 6. Multi-Persona Strategic Reasoning
-def personas_reasoning(keywords: list):
-    print("[Step 6] Performing persona-based strategic reasoning...")
-    joined = ", ".join(keywords)
-    prompt = f"""You are simulating a panel of startup advisors. Analyze the keyword cluster: {joined}
-
-- Growth Hacker
-- SEO Strategist
-- DTC Ecommerce Expert
-
-For each, write 1 sentence explaining the strategic value of this niche.
-"""
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content
-
-# 7. Assemble and Rank Opportunities
+# 6. Assemble and Rank Opportunities
 def assemble_opportunities(clusters, graph):
     print("[Step 5] Assembling and scoring opportunity clusters...")
     results = []
     for cluster_id, keywords in clusters.items():
         nodes = [graph.nodes[k] for k in keywords]
         avg_score = sum(score_keyword(n) for n in nodes) / len(nodes)
-        persona_thoughts = personas_reasoning(keywords)
         results.append({
             "theme": keywords[0].split()[0].capitalize() + " Theme",
             "keywords": keywords,
-            "avg_score": round(avg_score, 3),
-            "persona_thoughts": persona_thoughts
+            "avg_score": round(avg_score, 3)
         })
     return sorted(results, key=lambda x: x["avg_score"], reverse=True)
 
-# 8. Main Pipeline
+# 7. Main Pipeline
 def run_pipeline(user_query):
     print("\n[Pipeline Start] User query received: " + user_query)
     sectors = extract_sectors(user_query)
@@ -140,9 +163,9 @@ def run_pipeline(user_query):
 
 # Example Usage
 if __name__ == "__main__":
-    query = "diapers and pills"
+    query = "coffee cups"
     results = run_pipeline(query)
-    for opp in results:
-        print(f"\n=== Theme: {opp['theme']} | Score: {opp['avg_score']} ===")
-        print(f"Keywords: {', '.join(opp['keywords'])}")
-        print(f"Insights:\n{opp['persona_thoughts']}")
+    print(results)
+    # for opp in results:
+    #     print(f"\n=== Theme: {opp['theme']} | Score: {opp['avg_score']} ===")
+    #     print(f"Keywords: {', '.join(opp['keywords'])}")
