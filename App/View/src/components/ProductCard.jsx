@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ id, image, name, priceRange, trendScore, lastUpdated, sellers }) => {
+const ProductCard = ({ id, name, price, supplier, rating, lastUpdated }) => {
   const navigate = useNavigate();
   
   if (!name) return null;
@@ -10,12 +10,16 @@ const ProductCard = ({ id, image, name, priceRange, trendScore, lastUpdated, sel
     navigate(`/product/${id}`, { 
       state: { 
         id,
-        image, 
         name, 
-        priceRange, 
-        trendScore, 
-        lastUpdated,
-        sellers
+        description: `A ${name} from ${supplier}`,
+        priceRange: `$${price?.toFixed(2)}`,
+        image: "https://via.placeholder.com/400",
+        trendScore: rating ? rating * 20 : 0,
+        category: supplier,
+        sellers: [supplier],
+        price,
+        rating,
+        lastUpdated
       } 
     });
   };
@@ -33,34 +37,23 @@ const ProductCard = ({ id, image, name, priceRange, trendScore, lastUpdated, sel
         theme-transition
       `}
     >
-      <div className="w-full h-[200px] mb-4 rounded-lg overflow-hidden">
-        <img 
-          src={image} 
-          alt={name} 
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.onerror = null; // Prevent infinite loop
-            e.target.src = 'https://via.placeholder.com/200';
-          }}
-          loading="lazy"
-        />
-      </div>
       <div className="text-left">
         <h3 className="text-lg font-bold mb-2 text-foreground">{name}</h3>
-        <p className="text-primary mb-2">{priceRange || 'Price unavailable'}</p>
+        <p className="text-primary mb-2">${price?.toFixed(2) || 'Price unavailable'}</p>
+        <p className="text-sm text-muted-foreground mb-2">Supplier: {supplier || 'Unknown'}</p>
         <div className="mt-3">
-          <span className="block text-sm text-muted-foreground mb-1">Trend Score</span>
+          <span className="block text-sm text-muted-foreground mb-1">Rating</span>
           <div className="flex items-center gap-2">
             <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
               <div 
                 className="h-full bg-primary transition-all duration-300"
                 style={{ 
-                  width: `${typeof trendScore === 'number' ? trendScore : 0}%`,
+                  width: `${typeof rating === 'number' ? (rating * 20) : 0}%`,
                 }}
               />
             </div>
             <span className="text-sm text-primary font-medium">
-              {typeof trendScore === 'number' ? `${trendScore}%` : '0%'}
+              {typeof rating === 'number' ? rating.toFixed(1) : 'N/A'}
             </span>
           </div>
         </div>

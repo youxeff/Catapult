@@ -1,7 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import SalesGraph from "../components/SalesGraph";
-import ListingCard from "../components/ListingCard";
 
 const ProductPage = () => {
   const location = useLocation();
@@ -9,14 +8,16 @@ const ProductPage = () => {
   const { id } = useParams();
   const product = location.state || {
     id: id,
-    name: "Sample Product",
-    description: "This is a detailed description of the product.",
-    priceRange: "$0.00 - $0.00",
-    image:
-      "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.gelighting.com%2Fsmart-home%2Fled-bulbs%2Ffull-color&psig=AOvVaw3ANa-TiFyKBYfYDvxAY3LB&ust=1744580511777000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCJiSvIC704wDFQAAAAAdAAAAABAR",
+    name: "Product Not Found",
+    description: "This product could not be found.",
+    priceRange: "N/A",
+    image: "https://via.placeholder.com/400",
     trendScore: 0,
-    category: "Category",
-    sellers: ["Seller Name"],
+    category: "Unknown",
+    sellers: ["Unknown"],
+    price: 0,
+    rating: 0,
+    lastUpdated: null
   };
 
   return (
@@ -27,75 +28,62 @@ const ProductPage = () => {
             <div className="flex flex-col">
               <button
                 onClick={() => navigate("/")}
-                className="-left-4 top-0 px-4 py-2 flex-none items-center gap-2 text-sm
-            bg-card hover:bg-muted text-card-foreground
-            rounded-lg
-            transition-colors duration-200"
+                className="px-4 py-2 flex items-center gap-2 text-sm
+                  bg-card hover:bg-muted text-card-foreground
+                  rounded-lg transition-colors duration-200"
               >
-                <span>←</span>
+                <span>← Back to Products</span>
               </button>
             </div>
 
-            <div className="flex-none w-48 h-48">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover rounded-lg"
-              />
-            </div>
-            <div className="flex-grow">
-              <h1 className="text-3xl font-bold text-foreground mb-4">
-                {product.name}
-              </h1>
-              <p className="text-muted-foreground mb-4">
-                {product.description}
-              </p>
-              <p className="text-primary text-xl mb-6">{product.priceRange}</p>
-              {product.trendScore && (
-                <div className="mt-4">
-                  <span className="text-muted-foreground block mb-2">
-                    Trend Score: {product.trendScore}%
-                  </span>
-                  <div className="w-full h-2 bg-muted rounded-full">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all duration-300"
-                      style={{ width: `${product.trendScore}%` }}
-                    />
+            <div className="flex-grow flex gap-8">
+              <div className="flex-none w-48 h-48">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </div>
+              <div className="flex-grow">
+                <h1 className="text-3xl font-bold text-foreground mb-4">
+                  {product.name}
+                </h1>
+                <p className="text-muted-foreground mb-4">
+                  {product.description}
+                </p>
+                <p className="text-primary text-xl mb-4">{product.priceRange}</p>
+                <p className="text-muted-foreground mb-4">
+                  Supplier: {product.category}
+                </p>
+                {product.lastUpdated && (
+                  <p className="text-sm text-muted-foreground">
+                    Last Updated: {new Date(product.lastUpdated).toLocaleString()}
+                  </p>
+                )}
+                {product.rating && (
+                  <div className="mt-6">
+                    <span className="text-muted-foreground block mb-2">
+                      Rating: {product.rating.toFixed(1)}/5.0
+                    </span>
+                    <div className="w-full h-2 bg-muted rounded-full">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-300"
+                        style={{ width: `${(product.rating / 5) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         <div className="mt-8">
           <h2 className="text-xl font-semibold text-foreground mb-4">
-            Similar Products
+            Sales Performance
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array(product.sellers ? product.sellers.length : 4)
-              .fill({ ...product, id: undefined })
-              .map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-card border border-border rounded-lg p-4
-                  hover:bg-muted transition-colors duration-200"
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-40 object-cover rounded-lg mb-4"
-                  />
-                  <h3 className="font-medium text-foreground mb-2">
-                    {item.name}
-                  </h3>
-                  <p className="text-primary">{item.priceRange}</p>
-                  <p className="text-muted-foreground mt-2">{item.sellers[index]}</p>
-                </div>
-              ))}
-          </div>
+          <SalesGraph />
         </div>
-        <SalesGraph />
       </div>
     </div>
   );

@@ -21,11 +21,12 @@ function App() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/api/products');
+        const response = await fetch('http://localhost:5001/api/products');
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
         const data = await response.json();
+        console.log('Products fetched:', data); // Debug log
         setProducts(data);
         setLastUpdated(new Date().toLocaleDateString());
       } catch (err) {
@@ -45,7 +46,7 @@ function App() {
     try {
       let results;
       if (category && category !== 'all') {
-        const response = await fetch(`http://localhost:5000/api/products/category/${category}`);
+        const response = await fetch(`http://localhost:5001/api/products/category/${category}`);
         if (!response.ok) throw new Error('Failed to fetch category products');
         results = await response.json();
       } else {
@@ -57,7 +58,7 @@ function App() {
         const term = searchTerm.toLowerCase();
         results = results.filter(product => 
           product.name.toLowerCase().includes(term) ||
-          product.description.toLowerCase().includes(term)
+          (product.supplier && product.supplier.toLowerCase().includes(term))
         );
       }
 
@@ -73,11 +74,11 @@ function App() {
     const sorted = [...productsToSort].sort((a, b) => {
       switch (sortType) {
         case 'trending':
-          return b.trendScore - a.trendScore;
+          return (b.rating || 0) - (a.rating || 0);
         case 'price-low':
-          return a.price - b.price;
+          return (a.price || 0) - (b.price || 0);
         case 'price-high':
-          return b.price - a.price;
+          return (b.price || 0) - (a.price || 0);
         default:
           return 0;
       }
@@ -92,6 +93,7 @@ function App() {
 
   // Initialize filtered products
   useEffect(() => {
+    console.log('Setting filtered products:', products); // Debug log
     setFilteredProducts(products);
   }, [products]);
 
@@ -149,7 +151,9 @@ function App() {
           <div className="relative mt-6">
             <div className="overflow-x-auto" ref={gridRef}>
               <div className="flex gap-6 pb-6">
+                {console.log('About to render ProductGrid with:', { filteredProducts, loading })}
                 <ProductGrid products={filteredProducts} loading={loading} />
+                {error && <div className="text-red-500">{error}</div>}
               </div>
             </div>
             <GridNavigation 

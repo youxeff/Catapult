@@ -1,5 +1,5 @@
-from config import engine
-from models import Base
+from .config import engine
+from .models import Base
 
 def init_database():
     try:
