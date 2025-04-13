@@ -23,7 +23,7 @@ def get_products(search_term):
     try:
         products_json = json.loads(data)
     except Exception as e:
-        print("❌ JSON Error:", e)
+        print(" JSON Error:", e)
         print("Raw response:", data)
         return []
     
@@ -34,7 +34,7 @@ def get_products(search_term):
     # Adjust this key if needed based on the actual API response structure.
     items = products_json.get("products", [])
     if not items:
-        print("⚠️ No products found from API response.")
+        print(" No products found from API response.")
         return []
     
     # Further filter items to include only listings that have the search term
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     print(f"🔧 Testing search with keyword: '{test_keyword}'")
     matching_products = get_products(test_keyword)
     if not matching_products:
-        print("⚠️ No result to display after filtering.")
+        print(" No result to display after filtering.")
     else:
         # For demonstration, print out the first matching product
         top_product = matching_products[0]
