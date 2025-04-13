@@ -89,51 +89,54 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background">
-        <NavigationBar />
-        <ThemeToggle />
-        
-        <main className="container mx-auto px-4 py-8">
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4">
-              Discover Trending Products
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Find the next big thing before everyone else. Our AI-powered platform helps you identify trending products across all marketplaces.
-            </p>
-          </div>
-
-          {/* Search Section */}
-          <div className="mb-12">
-            <SearchBar onSearch={handleSearch} />
-          </div>
-
-          {/* Products Section */}
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">Top Picks</h2>
-                {lastUpdated && (
-                  <span className="text-sm text-muted-foreground">
-                    Last Updated: {lastUpdated}
-                  </span>
-                )}
-              </div>
-              <SortControls onSort={handleSort} activeSort={activeSort} />
+      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] relative">
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
+        <div className="relative">
+          <NavigationBar />
+          <ThemeToggle />
+          
+          <main className="container mx-auto px-4 py-8">
+            {/* Hero Section */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4">
+                Discover Trending Products
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Find the next big thing before everyone else. Our AI-powered platform helps you identify trending products across all marketplaces.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <ProductGrid products={filteredProducts} loading={loading} />
+            {/* Search Section */}
+            <div className="mb-12">
+              <SearchBar onSearch={handleSearch} />
             </div>
 
-            {error && (
-              <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-center">
-                {error}
+            {/* Products Section */}
+            <div className="space-y-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">Top Picks</h2>
+                  {lastUpdated && (
+                    <span className="text-sm text-muted-foreground">
+                      Last Updated: {lastUpdated}
+                    </span>
+                  )}
+                </div>
+                <SortControls onSort={handleSort} activeSort={activeSort} />
               </div>
-            )}
-          </div>
-        </main>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <ProductGrid products={filteredProducts} loading={loading} />
+              </div>
+
+              {error && (
+                <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-center">
+                  {error}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
       </div>
     </ThemeProvider>
   )

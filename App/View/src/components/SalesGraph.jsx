@@ -20,14 +20,14 @@ const SalesGraph = () => {
   for (let i = 1; i <= 30; i++) {
     data.push({
       day: i,
-      sold: db_data.prev/30.0 + i*(db_data.curr - db_data.prev/30.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0, // Random y-value around current value
+      sold: Math.round(db_data.prev/30.0 + i*(db_data.curr - db_data.prev/30.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0), // Random y-value around current value
     });
   }
   data[29].projected = data[29].sold;
   for (let i = 1; i <= 7; i++) {
     data.push({
       day: i + 30,
-      projected: db_data.curr + Math.max(i*db_data.curr*(1 + Math.pow(db_data.listVel, 3) / 5.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0, 0), // Random y-value around current value
+      projected: Math.round(db_data.curr + Math.max(i*db_data.curr*(1 + Math.pow(db_data.listVel, 3) / 5.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0, 0)), // Random y-value around current value
     });
   }
   return (
