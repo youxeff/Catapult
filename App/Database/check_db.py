@@ -1,5 +1,7 @@
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from sqlalchemy import text
-from config import engine
+from Database.config import engine
 import logging
 
 # Set up logging

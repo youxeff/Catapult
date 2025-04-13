@@ -5,6 +5,13 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: 'class',
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -50,6 +57,27 @@ export default {
         hide: {
           from: { opacity: "1" },
           to: { opacity: "0" },
+        },
+        slideIn: {
+          from: { transform: "translateY(calc(100% + var(--viewport-padding)))" },
+          to: { transform: "translateY(0)" },
+        },
+        swipeOut: {
+          from: { transform: "translateX(var(--radix-toast-swipe-end-x))" },
+          to: { transform: "translateX(calc(100% + var(--viewport-padding)))" },
+        },
+        shimmer: {
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
+        fadeIn: {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        scaleIn: {
+          from: { transform: "scale(0.95)" },
+          to: { transform: "scale(1)" },
         },
         slideDownAndFade: {
           from: { opacity: "0", transform: "translateY(-6px)" },
@@ -98,7 +126,12 @@ export default {
         },
       },
       animation: {
-        hide: "hide 150ms cubic-bezier(0.16, 1, 0.3, 1)",
+        hide: "hide 100ms ease-in",
+        slideIn: "slideIn 150ms cubic-bezier(0.16, 1, 0.3, 1)",
+        swipeOut: "swipeOut 100ms ease-out",
+        shimmer: "shimmer 2s infinite",
+        "fade-in": "fadeIn 200ms ease-out",
+        "scale-in": "scaleIn 200ms ease-out",
         slideDownAndFade:
           "slideDownAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)",
         slideLeftAndFade:

@@ -121,26 +121,70 @@ def assemble_opportunities(clusters, graph, sector):
     return sorted(results, key=lambda x: x["avg_score"], reverse=True)
 
 # 7. Main Pipeline
-async def run_pipeline(user_query):
+async def run_pipeline(user_query: str) -> dict:
+    """
+    Main pipeline that processes a user query and returns optimized search keywords
+    with market analysis.
+    
+    Args:
+        user_query (str): The user's search query
+        
+    Returns:
+        dict: Results containing:
+            - theme: The main product category/sector
+            - keywords: List of related keywords
+            - best_keyword: The highest scoring keyword
+            - metrics: Market metrics for the best keyword
+    """
     print("\n[Pipeline Start] Processing: " + user_query)
+    
+    # Extract relevant sectors
     sectors = await extract_sectors(user_query)
+    if not sectors:
+        # Fallback: treat the query itself as a sector
+        sectors = [user_query]
+    
+    # Generate keywords for each sector
     keyword_tasks = [fetch_keywords_for_sector(sector) for sector in sectors]
     keyword_lists = await asyncio.gather(*keyword_tasks)
-
+    
     all_opportunities = []
     for sector, keywords in zip(sectors, keyword_lists):
         if not keywords:
             continue
+            
+        # Build and analyze keyword graph
         graph = build_graph(keywords)
         clusters = cluster_keywords(graph)
-        all_opportunities.extend(assemble_opportunities(clusters, graph, sector))
-
+        sector_opportunities = assemble_opportunities(clusters, graph, sector)
+        all_opportunities.extend(sector_opportunities)
+    
+    # Sort by score and get best opportunity
+    if not all_opportunities:
+        # Fallback response using the original query
+        return {
+            "theme": user_query,
+            "keywords": [user_query],
+            "best_keyword": user_query,
+            "metrics": {
+                "volume": 500,
+                "cpc": 1.0,
+                "difficulty": 50,
+                "trend": 0.0
+            }
+        }
+    
+    best_opportunity = sorted(
+        all_opportunities,
+        key=lambda x: x["avg_score"],
+        reverse=True
+    )[0]
+    
     print("\n[Pipeline Complete]")
-    return sorted(all_opportunities, key=lambda x: x["avg_score"], reverse=True)[0]
-
+    return best_opportunity
 
 # Entry Point
 if __name__ == "__main__":
-    query = "coffee cups"
+    query = "smart home gadgets"
     results = asyncio.run(run_pipeline(query))
     print(json.dumps(results, indent=2))

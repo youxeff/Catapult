@@ -1,5 +1,7 @@
-from .config import engine
-from .models import Base
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from Database.config import engine
+from Database.models import Base
 
 def init_database():
     try:

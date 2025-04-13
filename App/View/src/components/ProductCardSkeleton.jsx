@@ -2,9 +2,9 @@ import React from 'react';
 
 const ProductCardSkeleton = () => {
   return (
-    <div className="flex flex-col bg-card rounded-xl border border-border/50 overflow-hidden animate-pulse">
+    <div className="flex flex-col h-full bg-card rounded-xl border border-border/50 overflow-hidden animate-pulse">
       {/* Image Skeleton */}
-      <div className="relative aspect-[4/3] bg-muted" />
+      <div className="relative aspect-square w-full bg-muted" />
 
       {/* Content Skeleton */}
       <div className="p-4 space-y-3">

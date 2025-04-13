@@ -17,15 +17,13 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 142.1 76.2% 36.3%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent-foreground: 355.7 100% 97.3%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 142.1 76.2% 36.3%;
     --radius: 0.5rem;
-    --background-start: 0 0% 100%;
-    --background-end: 210 40% 98%;
   }
 
   .dark {
@@ -48,8 +46,6 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 142.4 71.8% 29.2%;
-    --background-start: 222.2 84% 4.9%;
-    --background-end: 217.2 32.6% 17.5%;
   }
 
   * {
@@ -58,107 +54,34 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] text-foreground;
+    @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    margin: 0;
-    min-width: 320px;
-    min-height: 100vh;
   }
 
-  /* Animation Utilities */
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out;
+  /* Better Transitions */
+  .theme-transition {
+    @apply transition-colors duration-200;
   }
 
-  .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
-  }
-
-  .animate-slide-down {
-    animation: slideDown 0.3s ease-out;
-  }
-
-  .animate-scale {
-    animation: scale 0.2s ease-out;
-  }
-
-  /* Keyframes */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(10px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideDown {
-    from {
-      transform: translateY(-10px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes scale {
-    from {
-      transform: scale(0.95);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
-
-  /* Smooth Scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
-
-  /* Better Focus Styles */
-  :focus-visible {
-    @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
-  }
-
-  /* Make scrollbars match the theme */
+  /* Enhanced Scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    @apply w-2;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-secondary;
+    @apply bg-muted rounded-full;
   }
 
   ::-webkit-scrollbar-thumb {
     @apply bg-primary/60 hover:bg-primary rounded-full transition-colors;
   }
 
-  /* Enhanced button states */
-  button, a {
-    @apply transition-all duration-200;
+  /* Focus States */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
   }
 
-  button:active, a:active {
-    @apply transform scale-95;
-  }
-
-  /* Loading state animations */
+  /* Loading States */
   .loading-shimmer {
     @apply relative overflow-hidden;
   }
@@ -176,15 +99,36 @@
   }
 
   @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+
+  /* Animation Utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
     }
-    100% {
-      transform: translateX(100%);
+    to {
+      transform: translateY(0);
+      opacity: 1;
     }
   }
 
-  /* Subtle grid pattern overlay */
+  /* Grid Pattern */
   .bg-grid-pattern {
     background-image: linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
                       linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
@@ -195,20 +139,4 @@
                               rgba(0, 0, 0, 0.8) 40%,
                               transparent 70%);
   }
-}
-
-/* Theme transition utilities */
-.theme-transition {
-  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Ensure smooth transitions for all theme-related properties */
-*, 
-*::before, 
-*::after {
-  transition: background-color 0.15s ease-in-out,
-              border-color 0.15s ease-in-out,
-              color 0.15s ease-in-out;
 }

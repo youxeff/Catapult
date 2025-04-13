@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import SearchBar from './components/SearchBar'
 import ProductGrid from './components/ProductGrid'
 import SortControls from './components/SortControls'
@@ -38,43 +38,61 @@ function App() {
     fetchProducts();
   }, []);
 
-  const handleSearch = async ({ searchTerm, category }) => {
-    if (!products.length) return;
+  const handleSearch = async ({ searchTerm, category, results }) => {
+    if (!searchTerm) {
+      setFilteredProducts(products);
+      return;
+    }
 
     try {
-      let results;
-      if (category && category !== 'all') {
-        const response = await fetch(`http://localhost:5001/api/products/category/${category}`);
-        if (!response.ok) throw new Error('Failed to fetch category products');
-        results = await response.json();
-      } else {
-        results = [...products];
-      }
+      setLoading(true);
+      setError(null);
 
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        results = results.filter(product => 
-          product.name.toLowerCase().includes(term) ||
-          (product.supplier && product.supplier.toLowerCase().includes(term))
-        );
-      }
+      if (results) {
+        // Combine products from all sources
+        const allProducts = [
+          ...(results.products?.amazon || []),
+          ...(results.products?.aliexpress || []),
+          ...(results.products?.cj || [])
+        ];
 
-      sortProducts(results, activeSort);
+        // Update filtered products
+        if (allProducts.length > 0) {
+          setFilteredProducts(allProducts);
+        } else {
+          // If no results from unified search, fall back to local filtering
+          const filtered = products.filter(product => 
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (product.supplier && category !== 'all' && 
+             product.supplier.toLowerCase() === category.toLowerCase())
+          );
+          setFilteredProducts(filtered);
+        }
+
+        // Update last updated timestamp
+        setLastUpdated(new Date().toLocaleDateString());
+      }
     } catch (err) {
       console.error('Error during search:', err);
       setError('Search failed');
+      setFilteredProducts(products); // Fallback to all products
+    } finally {
+      setLoading(false);
     }
   };
 
-  const sortProducts = (productsToSort, sortType) => {
-    const sorted = [...productsToSort].sort((a, b) => {
+  const handleSort = (sortType) => {
+    setActiveSort(sortType);
+    const sorted = [...filteredProducts].sort((a, b) => {
       switch (sortType) {
-        case 'trending':
-          return (b.rating || 0) - (a.rating || 0);
         case 'price-low':
           return (a.price || 0) - (b.price || 0);
         case 'price-high':
           return (b.price || 0) - (a.price || 0);
+        case 'rating':
+          return (b.rating || 0) - (a.rating || 0);
+        case 'trending':
+          return (b.list_velocity || 0) - (a.list_velocity || 0);
         default:
           return 0;
       }
@@ -82,22 +100,15 @@ function App() {
     setFilteredProducts(sorted);
   };
 
-  const handleSort = (sortType) => {
-    setActiveSort(sortType);
-    sortProducts(filteredProducts, sortType);
-  };
-
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] relative">
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
-        <div className="relative">
-          <NavigationBar />
-          <ThemeToggle />
-          
-          <main className="container mx-auto px-4 py-8">
-            {/* Hero Section */}
-            <div className="text-center mb-12">
+      <div className="min-h-screen bg-background">
+        <NavigationBar />
+        
+        <main className="max-w-[1400px] mx-auto px-4 py-8">
+          {/* Hero Section */}
+          <div className="text-center mb-12">
+            <div className="max-w-3xl mx-auto mb-8">
               <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4">
                 Discover Trending Products
               </h1>
@@ -122,27 +133,27 @@ function App() {
                     </span>
                   )}
                 </div>
-                <SortControls onSort={handleSort} activeSort={activeSort} />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <ProductGrid products={filteredProducts.map(p => ({
-                  ...p,
-                  description: p.product_description || 'No description available'
-                }))} loading={loading} />
+                <SortControls activeSort={activeSort} onSort={handleSort} />
               </div>
 
               {error && (
-                <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-center">
+                <div className="text-destructive text-center py-4">
                   {error}
                 </div>
               )}
+
+              <div className="w-full">
+                <ProductGrid 
+                  products={filteredProducts}
+                  loading={loading}
+                />
+              </div>
             </div>
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;

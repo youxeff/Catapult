@@ -44,19 +44,19 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl,
   return (
     <div 
       onClick={handleClick} 
-      className={`
-        group relative flex flex-col
+      className="
+        group flex flex-col h-full
         bg-card text-card-foreground
         rounded-xl overflow-hidden
         border border-border/50
         hover:border-border
-        hover:shadow-lg
+        hover:shadow-lg hover:shadow-primary/5
         transform transition-all duration-200 ease-out
         cursor-pointer
-      `}
+      "
     >
       {/* Image Container */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+      <div className="relative aspect-square w-full overflow-hidden bg-muted">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -83,8 +83,8 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl,
 
       {/* Content */}
       <div className="flex flex-col flex-grow p-4 space-y-3">
-        <div className="flex-grow">
-          <h3 className="font-medium text-foreground line-clamp-2 mb-1">
+        <div className="flex-grow space-y-1">
+          <h3 className="font-medium text-foreground line-clamp-2">
             {name}
           </h3>
           <p className="text-sm text-muted-foreground">

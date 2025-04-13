@@ -17,21 +17,63 @@ const SearchBar = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showCategories, setShowCategories] = useState(false);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
+      if (searchTerm) {
+        performSearch();
+      }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, selectedCategory]);
 
-  useEffect(() => {
-    handleSearch();
-  }, [debouncedSearchTerm, selectedCategory]);
+  const performSearch = async () => {
+    if (!searchTerm) return;
+    
+    setIsSearching(true);
+    try {
+      const res = await fetch("http://localhost:5001/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          query: searchTerm,
+          category: selectedCategory === 'all' ? undefined : selectedCategory 
+        })
+      });
+  
+      if (!res.ok) throw new Error('Search failed');
+      const data = await res.json();
+      
+      // Call the parent's onSearch with the unified search results
+      onSearch({
+        searchTerm,
+        category: selectedCategory,
+        results: data
+      });
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
+  const handleInputChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const selectCategory = (categoryId) => {
+    setSelectedCategory(categoryId);
+    setShowCategories(false);
+    if (searchTerm) {
+      performSearch();
+    }
+  };
+
+  // Click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -42,22 +84,6 @@ const SearchBar = ({ onSearch }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleSearch = () => {
-    onSearch({
-      searchTerm: debouncedSearchTerm,
-      category: selectedCategory
-    });
-  };
-
-  const handleInputChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const selectCategory = (categoryId) => {
-    setSelectedCategory(categoryId);
-    setShowCategories(false);
-  };
 
   const selectedCategoryName = selectedCategory === 'all' 
     ? 'All Categories' 
@@ -76,9 +102,16 @@ const SearchBar = ({ onSearch }) => {
         `}>
           {/* Search Input */}
           <div className="flex-1 flex items-center gap-3 px-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-muted-foreground">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
+            {isSearching ? (
+              <svg className="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-muted-foreground">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+            )}
             <input
               type="text"
               value={searchTerm}
