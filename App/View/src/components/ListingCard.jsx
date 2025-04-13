@@ -1,75 +1,59 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 
-const ListingCard = ({ product_id, seller }) => {
-  const [loading, setLoading] = useState(true);
-  const [productDetails, setProductDetails] = useState(null);
-
-  useEffect(() => {
-    const fetchProductDetails = async () => {
-      try {
-        const response = await fetch(`https://api.example.com/products/${product_id}:${seller}`);
-        const data = await response.json();
-        setProductDetails(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching product details:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchProductDetails();
-  }, [product_id, seller]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  const { name, description, price, image } = productDetails;
-
+const ListingCard = ({ 
+  name,
+  description,
+  price,
+  image,
+  marketplace,
+  marketplaceIcon,
+  lastUpdated,
+  url
+}) => {
   return (
-    <div className="listing-card" style={styles.card}>
-      <img src={image} alt={name} style={styles.image} />
-      <div style={styles.content}>
-        <h2 style={styles.name}>{name}</h2>
-        <p style={styles.description}>{description}</p>
-        <p style={styles.price}>${price.toFixed(2)}</p>
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex flex-col bg-card rounded-xl border border-border overflow-hidden hover:border-primary/50 transition-all duration-200"
+    >
+      {/* Image */}
+      <div className="relative aspect-video bg-muted overflow-hidden">
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm border border-border text-xs font-medium">
+          {marketplaceIcon && (
+            <img src={marketplaceIcon} alt={marketplace} className="w-4 h-4" />
+          )}
+          <span>{marketplace}</span>
+        </div>
       </div>
-    </div>
-  );
-};
 
-const styles = {
-  card: {
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    overflow: 'hidden',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    maxWidth: '300px',
-    margin: '16px',
-  },
-  image: {
-    width: '100%',
-    height: '200px',
-    objectFit: 'cover',
-  },
-  content: {
-    padding: '16px',
-  },
-  name: {
-    fontSize: '1.5rem',
-    margin: '0 0 8px',
-  },
-  description: {
-    fontSize: '1rem',
-    color: '#555',
-    margin: '0 0 16px',
-  },
-  price: {
-    fontSize: '1.25rem',
-    fontWeight: 'bold',
-    color: '#333',
-  },
+      {/* Content */}
+      <div className="flex flex-col flex-grow p-4">
+        <div className="flex-grow">
+          <h3 className="font-medium text-foreground line-clamp-2 mb-1">
+            {name}
+          </h3>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+            {description}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-lg font-semibold text-foreground">
+            ${typeof price === 'number' ? price.toFixed(2) : price}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {new Date(lastUpdated).toLocaleDateString()}
+          </span>
+        </div>
+      </div>
+    </a>
+  );
 };
 
 export default ListingCard;
