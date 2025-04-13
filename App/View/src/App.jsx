@@ -21,48 +21,13 @@ function App() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        // Simulating database data structure
-        const mockData = {
-          products: [
-            {
-              id: 'tech-001',
-              image: 'https://via.placeholder.com/200',
-              name: 'Fast Charger 40W',
-              priceRange: '$ 4.05 - $ 5.00',
-              trendScore: 92,
-              categoryId: 'electronics',
-              price: 4.05,
-              description: 'High-speed charging adapter compatible with most devices',
-              sellers: ['Best Buy', 'Amazon', 'Walmart'],
-            },
-            {
-              id: 'tech-002',
-              image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MQD83?wid=1144&hei=1144&fmt=jpeg&qlt=95&.v=1660803972361',
-              name: 'AirPods Pro (2nd Gen)',
-              priceRange: '$ 249.99',
-              trendScore: 95,
-              categoryId: 'electronics',
-              price: 249.99,
-              description: 'AirPods Pro (2nd generation) with USB-C charging case',
-              sellers: ['Apple Store', 'Amazon', 'Best Buy'],
-            },
-            {
-              id: 'home-001',
-              image: 'https://www.gelighting.com/sites/default/files/styles/x_small_hq/public/image/2023-05/Dynamic%20Effects%20Products%20Smart%20Bulb.png?itok=zK9XACcq',
-              name: 'GE Smart LED Bulb',
-              priceRange: '$ 15.99 - $ 19.99',
-              trendScore: 85,
-              categoryId: 'home',
-              price: 15.99,
-              description: 'Full-color smart LED bulb with millions of colors and Wi-Fi connectivity',
-              sellers: ['Home Depot', 'Lowe\'s', 'Amazon'],
-            }
-          ],
-          lastUpdated: new Date().toLocaleDateString()
-        };
-        
-        setProducts(mockData.products);
-        setLastUpdated(mockData.lastUpdated);
+        const response = await fetch('http://localhost:5000/api/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        setProducts(data);
+        setLastUpdated(new Date().toLocaleDateString());
       } catch (err) {
         setError('Failed to fetch products');
         console.error('Error fetching products:', err);
@@ -74,27 +39,34 @@ function App() {
     fetchProducts();
   }, []);
 
-  const handleSearch = ({ searchTerm, category }) => {
+  const handleSearch = async ({ searchTerm, category }) => {
     if (!products.length) return;
 
-    let results = [...products];
+    try {
+      let results;
+      if (category && category !== 'all') {
+        const response = await fetch(`http://localhost:5000/api/products/category/${category}`);
+        if (!response.ok) throw new Error('Failed to fetch category products');
+        results = await response.json();
+      } else {
+        results = [...products];
+      }
 
-    // Filter by search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      results = results.filter(product => 
-        product.name.toLowerCase().includes(term) ||
-        product.description.toLowerCase().includes(term)
-      );
+      // Filter by search term
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        results = results.filter(product => 
+          product.name.toLowerCase().includes(term) ||
+          product.description.toLowerCase().includes(term)
+        );
+      }
+
+      // Apply current sort
+      sortProducts(results, activeSort);
+    } catch (err) {
+      console.error('Error during search:', err);
+      setError('Search failed');
     }
-
-    // Filter by category
-    if (category && category !== 'all') {
-      results = results.filter(product => product.categoryId === category);
-    }
-
-    // Apply current sort
-    sortProducts(results, activeSort);
   };
 
   const sortProducts = (productsToSort, sortType) => {
