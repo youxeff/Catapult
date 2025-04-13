@@ -9,11 +9,15 @@ API_KEY = "d5d656d29fmsheeede719dac5fc8p1c5c5ajsn7da55608f234"
 API_HOST = "aliexpress-true-api.p.rapidapi.com"
 
 def get_products(search_term):
-    # Build endpoint using the given search term.
+    # Encode the search term by replacing spaces with plus signs.
+    encoded_search_term = search_term.replace(" ", "+")
+    
+    # Build endpoint using the encoded search term.
     endpoint = (
-        f"/api/v3/products?page_no=1&ship_to_country=US&keywords={search_term}"
+        f"/api/v3/products?page_no=1&ship_to_country=US&keywords={encoded_search_term}"
         f"&target_currency=USD&target_language=EN&page_size=50&sort=SALE_PRICE_ASC"
     )
+    
     conn = http.client.HTTPSConnection(API_HOST)
     headers = {
         'x-rapidapi-key': API_KEY,
@@ -28,46 +32,42 @@ def get_products(search_term):
         print("JSON Error:", e)
         print("Raw response:", data)
         return []
-
+    
     # Debug: print the full JSON response structure
     print("DEBUG - Full JSON response:")
     print(json.dumps(products_json, indent=2))
-
-    # Adjust this key if needed based on the actual API response structure.
+    
+    # Extract products from the response (adjust key if needed).
     items = products_json.get("products", [])
     if not items:
         print("No products found from API response.")
         return []
-
-    # Further filter items to include only listings that have the search term
-    # in their title (or product_title) in a case-insensitive manner.
+    
+    # Filter items to include only those whose title includes the search term (case-insensitive).
     filtered = []
     search_term_lower = search_term.lower()
     for item in items:
-        # Try common keys for product name. Adjust as needed.
         title = item.get("title") or item.get("product_title", "")
         if search_term_lower in title.lower():
             filtered.append(item)
     return filtered
 
 if __name__ == "__main__":
-    # Allow the user to optionally pass a query as a command-line argument.
-    # This query is fed into the SEO pipeline.
+    # Optionally allow passing a query as a command-line argument.
     if len(sys.argv) > 1:
         query = sys.argv[1]
     else:
         query = "coffee cups"  # Default query if none provided
 
     print(f"🔧 Running SEO pipeline for query: '{query}'")
-    # Run the asynchronous SEO pipeline to get keyword opportunities.
+    # Run the asynchronous SEO pipeline to generate keyword opportunities.
     results = asyncio.run(run_pipeline(query))
 
     if not results:
         print("No SEO opportunities generated for the query.")
         sys.exit(1)
 
-    # Extract a keyword from the pipeline results.
-    # Assuming the result is a dict containing a "keywords" list.
+    # Extract the top keyword from the pipeline output.
     try:
         search_keyword = results["keywords"][0]
         print(f"Top keyword from pipeline: '{search_keyword}'")
