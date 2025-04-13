@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl }) => {
+const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, sold_today, sold_1_month_ago, list_velocity, imageUrl }) => {
   const navigate = useNavigate();
   
   if (!name) return null;
@@ -20,6 +20,9 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl 
         price,
         rating,
         lastUpdated,
+        sold_today,
+        sold_1_month_ago,
+        list_velocity,
         imageUrl
       } 
     });
