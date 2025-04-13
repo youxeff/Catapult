@@ -20,71 +20,132 @@ const ProductPage = () => {
     lastUpdated: null
   };
 
+  const formatDate = (date) => {
+    if (!date) return "Not available";
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground p-6">
-      <div className="max-w-7xl mx-auto relative">
-        <div className="mt-16 bg-card rounded-xl border border-border overflow-hidden">
-          <div className="p-4 flex gap-4">
-            <div className="flex flex-col">
-              <button
-                onClick={() => navigate("/")}
-                className="px-4 py-2 flex items-center gap-2 text-sm
-                  bg-card hover:bg-muted text-card-foreground
-                  rounded-lg transition-colors duration-200"
-              >
-                <span>← Back to Products</span>
-              </button>
+    <div className="min-h-screen bg-background">
+      {/* Navigation Bar */}
+      <div className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="h-16 flex items-center gap-4">
+            <button
+              onClick={() => navigate("/")}
+              className="text-foreground hover:text-primary transition-colors"
+              aria-label="Back to products"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </button>
+            <span className="text-sm text-muted-foreground">
+              Back to Products
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Left Column - Image */}
+          <div className="space-y-4">
+            <div className="aspect-square rounded-xl overflow-hidden bg-muted">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+
+          {/* Right Column - Product Info */}
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold text-foreground">
+                {product.name}
+              </h1>
+              <div className="flex items-center gap-4">
+                <span className="text-2xl font-semibold text-primary">
+                  {product.priceRange}
+                </span>
+                {product.rating >= 4.5 && (
+                  <span className="px-2 py-1 text-xs font-medium text-primary-foreground bg-primary rounded-full">
+                    Trending
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="flex-grow flex gap-8">
-              <div className="flex-none w-48 h-48">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover rounded-lg"
-                />
+            <div className="space-y-4">
+              <div className="prose text-muted-foreground">
+                <p>{product.description}</p>
               </div>
-              <div className="flex-grow">
-                <h1 className="text-3xl font-bold text-foreground mb-4">
-                  {product.name}
-                </h1>
-                <p className="text-muted-foreground mb-4">
-                  {product.description}
-                </p>
-                <p className="text-primary text-xl mb-4">{product.priceRange}</p>
-                <p className="text-muted-foreground mb-4">
-                  Supplier: {product.category}
-                </p>
-                {product.lastUpdated && (
-                  <p className="text-sm text-muted-foreground">
-                    Last Updated: {new Date(product.lastUpdated).toLocaleString()}
-                  </p>
-                )}
-                {product.rating && (
-                  <div className="mt-6">
-                    <span className="text-muted-foreground block mb-2">
-                      Rating: {product.rating.toFixed(1)}/5.0
-                    </span>
-                    <div className="w-full h-2 bg-muted rounded-full">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-300"
-                        style={{ width: `${(product.rating / 5) * 100}%` }}
-                      />
-                    </div>
+
+              <div className="border-t border-border pt-4">
+                <dl className="space-y-4">
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Category</dt>
+                    <dd className="font-medium text-foreground">{product.category}</dd>
                   </div>
-                )}
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Supplier</dt>
+                    <dd className="font-medium text-foreground">
+                      {product.sellers?.join(", ") || "Unknown"}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Last Updated</dt>
+                    <dd className="font-medium text-foreground">
+                      {formatDate(product.lastUpdated)}
+                    </dd>
+                  </div>
+                  {product.rating && (
+                    <div className="flex justify-between items-center">
+                      <dt className="text-muted-foreground">Rating</dt>
+                      <dd className="flex items-center gap-2">
+                        <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary transition-all duration-300"
+                            style={{ width: `${(product.rating / 5) * 100}%` }}
+                          />
+                        </div>
+                        <span className="font-medium text-foreground">
+                          {product.rating.toFixed(1)}/5.0
+                        </span>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
               </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-4">
+              <button className="w-full py-3 px-8 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                Track Product
+              </button>
+              <button className="w-full py-3 px-8 rounded-lg border border-border text-foreground hover:bg-muted transition-colors">
+                Add to Watchlist
+              </button>
             </div>
           </div>
         </div>
 
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4">
+        {/* Sales Performance Graph */}
+        <div className="mt-16 p-6 border border-border rounded-xl bg-card">
+          <h2 className="text-xl font-semibold text-foreground mb-6">
             Sales Performance
           </h2>
           <SalesGraph />
         </div>
-      </div>
+      </main>
     </div>
   );
 };

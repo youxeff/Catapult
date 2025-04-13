@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import SearchBar from './components/SearchBar'
 import ProductGrid from './components/ProductGrid'
 import SortControls from './components/SortControls'
-import GridNavigation from './components/GridNavigation'
+import NavigationBar from './components/NavigationBar'
 import ThemeToggle from './components/ThemeToggle'
 import { ThemeProvider } from './context/ThemeContext'
 import './App.css'
@@ -14,8 +14,6 @@ function App() {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [activeSort, setActiveSort] = useState('trending');
-  const gridRef = useRef(null);
-  const [canScroll, setCanScroll] = useState({ left: false, right: true });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -26,8 +24,8 @@ function App() {
           throw new Error('Failed to fetch products');
         }
         const data = await response.json();
-        console.log('Products fetched:', data); // Debug log
         setProducts(data);
+        setFilteredProducts(data);
         setLastUpdated(new Date().toLocaleDateString());
       } catch (err) {
         setError('Failed to fetch products');
@@ -53,7 +51,6 @@ function App() {
         results = [...products];
       }
 
-      // Filter by search term
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
         results = results.filter(product => 
@@ -62,7 +59,6 @@ function App() {
         );
       }
 
-      // Apply current sort
       sortProducts(results, activeSort);
     } catch (err) {
       console.error('Error during search:', err);
@@ -91,68 +87,51 @@ function App() {
     sortProducts(filteredProducts, sortType);
   };
 
-  // Initialize filtered products
-  useEffect(() => {
-    console.log('Setting filtered products:', products); // Debug log
-    setFilteredProducts(products);
-  }, [products]);
-
-  const handleScroll = (direction) => {
-    if (!gridRef.current) return;
-    
-    const scrollAmount = 300;
-    const newScrollLeft = gridRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
-    
-    gridRef.current.scrollTo({
-      left: newScrollLeft,
-      behavior: 'smooth'
-    });
-  };
-
-  useEffect(() => {
-    const checkScroll = () => {
-      if (!gridRef.current) return;
-      
-      const { scrollLeft, scrollWidth, clientWidth } = gridRef.current;
-      setCanScroll({
-        left: scrollLeft > 0,
-        right: scrollLeft < scrollWidth - clientWidth - 10
-      });
-    };
-
-    const gridElement = gridRef.current;
-    if (gridElement) {
-      gridElement.addEventListener('scroll', checkScroll);
-      checkScroll();
-    }
-
-    return () => {
-      if (gridElement) {
-        gridElement.removeEventListener('scroll', checkScroll);
-      }
-    };
-  }, [products]);
-
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background text-foreground">
-        <main className="container mx-auto px-4">
-          <ThemeToggle />
-          <SearchBar onSearch={handleSearch} />
-          <div className="flex justify-between items-center my-8">
-            <h2 className="text-6xl font-bold text-foreground">Top Picks</h2>
-            {lastUpdated && (
-              <span className="text-sm text-muted-foreground">
-                Last Updated: {lastUpdated}
-              </span>
-            )}
+      <div className="min-h-screen bg-background">
+        <NavigationBar />
+        <ThemeToggle />
+        
+        <main className="container mx-auto px-4 py-8">
+          {/* Hero Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4">
+              Discover Trending Products
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Find the next big thing before everyone else. Our AI-powered platform helps you identify trending products across all marketplaces.
+            </p>
           </div>
-          <SortControls onSort={handleSort} activeSort={activeSort} />
-          <div className="product-grid-container">
-            <div className="product-grid">
-              <ProductGrid products={filteredProducts} loading={loading} />
-              {error && <div className="text-red-500">{error}</div>}
+
+          {/* Search Section */}
+          <div className="mb-12">
+            <SearchBar onSearch={handleSearch} />
+          </div>
+
+          {/* Products Section */}
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">Top Picks</h2>
+                {lastUpdated && (
+                  <span className="text-sm text-muted-foreground">
+                    Last Updated: {lastUpdated}
+                  </span>
+                )}
+              </div>
+              <SortControls onSort={handleSort} activeSort={activeSort} />
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <ProductGrid products={filteredProducts} loading={loading} />
+            </div>
+
+            {error && (
+              <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-center">
+                {error}
+              </div>
+            )}
           </div>
         </main>
       </div>

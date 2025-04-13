@@ -23,10 +23,7 @@ const SalesGraph = () => {
       y: db_data.prev/30.0 + i*(db_data.curr - db_data.prev/30.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0, // Random y-value around current value
     });
   }
-  data.push({
-    x: 30,
-    y2: db_data.curr,
-  });
+  data[29].y2 = data[29].y;
   for (let i = 1; i <= 7; i++) {
     data.push({
       x: i + 30,
