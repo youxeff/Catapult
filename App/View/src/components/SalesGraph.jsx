@@ -11,11 +11,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const db_data = {curr: 15, prev: 150, listVel: 3}; // Example data from the database
+//const db_data = {curr: 15, prev: 150, listVel: 3}; // Example data from the database
 
 const verticalLines = [30]; // X-values where you want vertical dotted lines
 
-const SalesGraph = () => {
+const SalesGraph = ({ curr, prev, listVel, name, desc }) => {
+  const db_data = {curr, prev, listVel, name, desc};
   let data = [];
   for (let i = 1; i <= 30; i++) {
     data.push({

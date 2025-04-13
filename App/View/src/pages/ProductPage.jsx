@@ -17,7 +17,10 @@ const ProductPage = () => {
     sellers: ["Unknown"],
     price: 0,
     rating: 0,
-    lastUpdated: null
+    lastUpdated: null,
+    sold_today: 0,
+    sold_1_month_ago: 0,
+    list_velocity: 0,
   };
 
   const formatDate = (date) => {
@@ -143,7 +146,7 @@ const ProductPage = () => {
           <h2 className="text-xl font-semibold text-foreground mb-6">
             Sales Performance
           </h2>
-          <SalesGraph />
+          <SalesGraph curr={product.sold_today} prev={product.sold_1_month_ago} list_velocity={product.list_velocity} name={product.name} desc={product.description} />
         </div>
       </main>
     </div>
