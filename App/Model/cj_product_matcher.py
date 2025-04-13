@@ -1,16 +1,13 @@
-# STEP 1: INSTALL REQUIRED PACKAGE
-# Run this in your terminal if not already installed:
-# pip install sentence-transformers requests python-dotenv
-
 import os
 import requests
 import asyncio
 import math
+import random
+import mysql.connector
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer, util
 from datetime import datetime
 from new_trend import run_pipeline  
-
 
 # --- Setup ---
 load_dotenv()
@@ -18,6 +15,15 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 CJ_API_TOKEN = os.getenv("CJ_API_TOKEN")
 BASE_URL = "https://developers.cjdropshipping.com/api2.0/v1"
 HEADERS = {"CJ-Access-Token": CJ_API_TOKEN}
+
+# --- MySQL connection ---
+db = mysql.connector.connect(
+    host="productsdb.cvce864kqv1q.us-east-2.rds.amazonaws.com",
+    user="admin",
+    password="malaysiaboleh",
+    database="productsdb"
+)
+cursor = db.cursor()
 
 # --- 1. Search CJ with Keyword ---
 def search_products(keyword, page=1, size=20):
@@ -56,9 +62,16 @@ def print_products(products):
         print("No relevant products found.")
         return
     for p in products:
+        product_name = p.get("productNameEn")
+        product_similarity = p.get("similarity")
+        product_price = p.get("sellPrice") or 0.00
+        product_category = p.get("categoryName")
+        product_image = p.get("productImage")
+        product_sku = p.get("productSku")
+        product_create_time = p.get("createTime")
 
-        age_in_months = calculate_age_in_months(p.get("createTime"))
-        listed_num = p.get("listedNum")
+        age_in_months = calculate_age_in_months(product_create_time)
+        listed_num = p.get("listedNum", 0)
         listing_velocity = round(listed_num / age_in_months if age_in_months > 0 else 0, 2)
 
         # Apply log scaling and square the listing velocity
@@ -70,44 +83,79 @@ def print_products(products):
             squared_velocity = 0
 
         print("\n---------------------------")
-        print("Name:", p.get("productNameEn"))
-        print("Similarity:", p.get("similarity"))
-        print("Price:", p.get("sellPrice"))
-        print("Category:", p.get("categoryName"))
-        print("Image:", p.get("productImage"))
-        print("SKU:", p.get("productSku"))
-        print("CreationTime:", p.get("createTime"))
+        print("Name:", product_name)
+        print("Similarity:", product_similarity)
+        print("Price:", product_price)
+        print("Category:", product_category)
+        print("Image:", product_image)
+        print("SKU:", product_sku)
+        print("CreationTime:", product_create_time)
         print("ListedNum:", listed_num)
         print("Age_months:", age_in_months)
         print("ListingVelocity:", listing_velocity)
         print("SquaredScaleVelocity:", squared_velocity)
-        
 
-# --- 4. Calculate Age in Months ---
+        product_data = {
+            "productNameEn": product_name,
+            "categoryName": product_category,
+            "squared_velocity": squared_velocity,
+            "sellPrice": product_price,
+            "productImage": product_image
+        }
+
+        insert_product(product_data)
+
+# --- 4. Insert product listing data into database ---
+def insert_product(product):
+    try:
+        full_title = product.get("productNameEn", "No Title").strip()
+        title_words = full_title.split()
+        short_title = " ".join(title_words[:3]) if len(title_words) >= 3 else full_title
+
+        query = """
+        INSERT INTO tiktok_products (
+            product_name,
+            product_description,
+            product_category,
+            list_velocity,
+            supplier,
+            product_price,
+            rating,
+            product_image_url
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        values = (
+            short_title,                         # ✅ First 3 words
+            full_title,                          # ✅ Full title
+            product.get("categoryName"),
+            product.get("squared_velocity"),
+            "CJDropShipping",
+            product.get("sellPrice") or 0.00,
+            round(random.uniform(1, 5), 2),
+            product.get("productImage")
+        )
+        cursor.execute(query, values)
+        db.commit()
+        print(f"✅ Inserted product: {short_title}")
+    except Exception as e:
+        print(f"❌ Error inserting product: {e}")
+
+
+# --- 5. Calculate Age in Months ---
 def calculate_age_in_months(creation_time_ms):
-    # Convert milliseconds to seconds
-    creation_time_s = creation_time_ms / 1000
-
-    # Convert Unix time to a datetime object
-    creation_date = datetime.fromtimestamp(creation_time_s)
-
-    # Get the current date
-    current_date = datetime.now()
-
-    # Calculate the total difference in days
-    total_days = (current_date - creation_date).days
-
-    # Approximate the number of months as days divided by the average days in a month (30.44)
-    age_in_months = total_days / 30.44
-
-    return round(age_in_months, 2)  # Round to 2 decimal places
-
-
+    try:
+        creation_time_s = creation_time_ms / 1000
+        creation_date = datetime.fromtimestamp(creation_time_s)
+        current_date = datetime.now()
+        total_days = (current_date - creation_date).days
+        return round(total_days / 30.44, 2)
+    except:
+        return 0.0
 
 # --- MAIN ---
 if __name__ == "__main__":
     user_query = "coffee cups"
-    keyword = asyncio.run(run_pipeline(user_query))['theme'] 
+    keyword = asyncio.run(run_pipeline(user_query))  # ✅ run_pipeline returns a string
     print(f"🔍 Searching for: {keyword}")
     raw_products = search_products(keyword)
     print(f"Fetched {len(raw_products)} products. Filtering for semantic relevance...")
