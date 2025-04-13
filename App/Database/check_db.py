@@ -1,5 +1,10 @@
 from sqlalchemy import text
 from config import engine
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def check_database():
     try:
@@ -7,16 +12,16 @@ def check_database():
             # Check tables
             result = conn.execute(text("SHOW TABLES"))
             tables = [row[0] for row in result]
-            print("Tables in database:", tables)
+            logger.info(f"Tables in database: {tables}")
             
             # If tiktok_products exists, check its structure
             if 'tiktok_products' in tables:
                 result = conn.execute(text("DESCRIBE tiktok_products"))
-                print("\nTable structure:")
+                logger.info("\nTable structure:")
                 for row in result:
-                    print(row)
+                    logger.info(row)
     except Exception as e:
-        print(f"Error connecting to database: {e}")
+        logger.error(f"Error connecting to database: {e}")
 
 if __name__ == "__main__":
     check_database()

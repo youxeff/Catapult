@@ -135,8 +135,8 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background text-foreground transition-colors">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="min-h-screen bg-background text-foreground">
+        <main className="container mx-auto px-4">
           <ThemeToggle />
           <SearchBar onSearch={handleSearch} />
           <div className="flex justify-between items-center my-8">
@@ -148,22 +148,13 @@ function App() {
             )}
           </div>
           <SortControls onSort={handleSort} activeSort={activeSort} />
-          <div className="relative mt-6">
-            <div className="overflow-x-auto" ref={gridRef}>
-              <div className="flex gap-6 pb-6">
-                {console.log('About to render ProductGrid with:', { filteredProducts, loading })}
-                <ProductGrid products={filteredProducts} loading={loading} />
-                {error && <div className="text-red-500">{error}</div>}
-              </div>
+          <div className="product-grid-container">
+            <div className="product-grid">
+              <ProductGrid products={filteredProducts} loading={loading} />
+              {error && <div className="text-red-500">{error}</div>}
             </div>
-            <GridNavigation 
-              onScrollLeft={() => handleScroll('left')}
-              onScrollRight={() => handleScroll('right')}
-              canScrollLeft={canScroll.left}
-              canScrollRight={canScroll.right}
-            />
           </div>
-        </div>
+        </main>
       </div>
     </ThemeProvider>
   )
