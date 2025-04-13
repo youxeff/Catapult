@@ -24,12 +24,38 @@ const ProductGrid = ({ products, loading }) => {
   console.log('ProductGrid: Rendering products:', products); // Debug log
   return (
     <>
-      {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          {...product}
-        />
-      ))}
+      {products.map((product) => {
+        const {
+          id,
+          name,
+          price,
+          supplier,
+          rating,
+          lastUpdated,
+          imageUrl,
+          product_description,
+          sold_today = 0,
+          sold_1_month_ago = 0,
+          list_velocity = 0
+        } = product;
+
+        return (
+          <ProductCard
+            key={id}
+            id={id}
+            name={name}
+            price={price}
+            supplier={supplier}
+            rating={rating}
+            lastUpdated={lastUpdated}
+            imageUrl={imageUrl}
+            description={product_description}
+            sold_today={sold_today}
+            sold_1_month_ago={sold_1_month_ago}
+            list_velocity={list_velocity}
+          />
+        );
+      })}
     </>
   );
 };

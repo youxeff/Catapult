@@ -32,7 +32,10 @@ def get_products():
             'rating': float(p.rating) if p.rating else None,
             'lastUpdated': p.created_at.isoformat() if p.created_at else None,
             'imageUrl': p.product_image_url or "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600",
-            'product_description': p.product_description
+            'product_description': p.product_description,
+            'sold_today': p.sold_today or 0,
+            'sold_1_month_ago': p.sold_1_month_ago or 0,
+            'list_velocity': float(p.list_velocity) if p.list_velocity else 0
         } for p in products])
     except Exception as e:
         print(f"Error in get_products: {str(e)}")
@@ -55,7 +58,10 @@ def get_products_by_category(category_id):
             'rating': float(p.rating) if p.rating else None,
             'lastUpdated': p.created_at.isoformat() if p.created_at else None,
             'imageUrl': p.product_image_url or "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600",
-            'product_description': p.product_description
+            'product_description': p.product_description,
+            'sold_today': p.sold_today or 0,
+            'sold_1_month_ago': p.sold_1_month_ago or 0,
+            'list_velocity': float(p.list_velocity) if p.list_velocity else 0
         } for p in products])
     except Exception as e:
         return jsonify({'error': str(e)}), 500

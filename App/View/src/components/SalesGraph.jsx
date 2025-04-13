@@ -11,53 +11,95 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-//const db_data = {curr: 15, prev: 150, listVel: 3}; // Example data from the database
-
 const verticalLines = [30]; // X-values where you want vertical dotted lines
 
-const SalesGraph = ({ curr, prev, listVel, name, desc }) => {
-  const db_data = {curr, prev, listVel, name, desc};
-  let data = [];
+const SalesGraph = ({ curr = 0, prev = 0, listVel = 0, name, desc }) => {
+  const data = [];
+  // Past 30 days data
   for (let i = 1; i <= 30; i++) {
     data.push({
       day: i,
-      sold: Math.round(db_data.prev/30.0 + i*(db_data.curr - db_data.prev/30.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0), // Random y-value around current value
+      sold: Math.max(0, Math.round(prev/30.0 + i*(curr - prev/30.0) + ((Math.random() * 2) - 1) * prev / 5.0)),
     });
   }
+
+  // Add projected data point at day 30
   data[29].projected = data[29].sold;
+
+  // Future 7 days projection
   for (let i = 1; i <= 7; i++) {
+    const projectedValue = Math.max(0, Math.round(
+      curr + i*curr*(1 + Math.pow(listVel, 3) / 5.0) + 
+      ((Math.random() * 2) - 1) * prev / 2.0
+    ));
+    
     data.push({
       day: i + 30,
-      projected: Math.round(db_data.curr + Math.max(i*db_data.curr*(1 + Math.pow(db_data.listVel, 3) / 5.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0, 0)), // Random y-value around current value
+      projected: projectedValue
     });
   }
+
+  // Calculate if trend is positive
+  const isPositiveTrend = data[data.length - 1].projected > data[29].projected;
+
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={data}>
+      <LineChart data={data} margin={{ top: 40, right: 20, left: 20, bottom: 20 }}>
         <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-        <Tooltip />
+        <Tooltip 
+          formatter={(value) => [value, "Units"]}
+          labelFormatter={(day) => `Day ${day}`}
+        />
         <text
-          x={200}
+          x="50%"
           y={20}
           textAnchor="middle"
           dominantBaseline="middle"
-          style={{ fontSize: 18, fontWeight: "bold" }}
+          className="text-foreground"
+          style={{ fontSize: 16, fontWeight: "bold" }}
         >
-          Sales Performance Graph
+          Sales Performance
         </text>
-        <XAxis dataKey="x" label={{ value: "Days", position: "insideBottom", offset: -5 }} />
-        <YAxis label={{ value: "Interest", angle: -90, position: "insideLeft" }} />
-        <Line type="linear" dataKey="sold" stroke="#8884d8" strokeWidth={2} />
-        <Line type="linear" dataKey="projected" strokeDasharray="4 4" stroke={data[36].y2 - data[29].y > 0 ? "#59e859" : "#e85859"} strokeWidth={2} />
+        <XAxis 
+          dataKey="day" 
+          label={{ value: "Days", position: "insideBottom", offset: -10 }}
+        />
+        <YAxis 
+          label={{ 
+            value: "Units Sold", 
+            angle: -90, 
+            position: "insideLeft",
+            offset: -5
+          }} 
+        />
+        <Line 
+          type="monotone" 
+          dataKey="sold" 
+          stroke="#8884d8" 
+          strokeWidth={2}
+          dot={false}
+        />
+        <Line 
+          type="monotone" 
+          dataKey="projected" 
+          strokeDasharray="4 4" 
+          stroke={isPositiveTrend ? "#4CAF50" : "#f44336"}
+          strokeWidth={2}
+          dot={false}
+        />
 
-        {/* Vertical Dotted Lines */}
         {verticalLines.map((xValue, index) => (
           <ReferenceLine
             key={index}
             x={xValue}
-            stroke="red"
+            stroke="#666"
             strokeDasharray="4 4"
-            label={{ value: `x = ${xValue}`, position: "top", fill: "red", fontSize: 12 }}
+            label={{ 
+              value: "Today", 
+              position: "top",
+              fill: "#666",
+              fontSize: 12
+            }}
           />
         ))}
       </LineChart>
