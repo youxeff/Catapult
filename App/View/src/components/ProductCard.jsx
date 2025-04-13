@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, sold_today, sold_1_month_ago, list_velocity, imageUrl }) => {
+const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl, description }) => {
   const navigate = useNavigate();
   
   if (!name) return null;
@@ -11,19 +11,12 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, sold_toda
       state: { 
         id,
         name, 
-        description: `A ${name} from ${supplier}`,
-        priceRange: `$${price?.toFixed(2)}`,
-        image: imageUrl, // Remove fallback here since we'll handle it in the img tag
-        trendScore: rating ? rating * 20 : 0,
-        category: supplier,
-        sellers: [supplier],
         price,
+        supplier,
         rating,
         lastUpdated,
-        sold_today,
-        sold_1_month_ago,
-        list_velocity,
-        imageUrl
+        imageUrl,
+        description
       } 
     });
   };

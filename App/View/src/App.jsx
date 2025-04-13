@@ -126,7 +126,10 @@ function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <ProductGrid products={filteredProducts} loading={loading} />
+                <ProductGrid products={filteredProducts.map(p => ({
+                  ...p,
+                  description: p.product_description || 'No description available'
+                }))} loading={loading} />
               </div>
 
               {error && (
