@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import SalesGraph from "../components/SalesGraph";
 
@@ -6,6 +6,13 @@ const ProductPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
+  const [projectedStats, setProjectedStats] = useState({
+    lastValue: 0,
+    projectedValue: 0,
+    avgDailyChange: 0,
+    totalChange: 0
+  });
+  
   const placeholderImage = "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600";
   const product = location.state || {
     id: id,
@@ -21,6 +28,10 @@ const ProductPage = () => {
     imageUrl: null
   };
 
+  const handleProjectionUpdate = (stats) => {
+    setProjectedStats(stats);
+  };
+
   const formatDate = (date) => {
     if (!date) return "Not available";
     return new Date(date).toLocaleDateString('en-US', {
@@ -29,6 +40,19 @@ const ProductPage = () => {
       day: 'numeric'
     });
   };
+
+  // Calculate projected revenue for next 30 days based on graph data
+  const projectedRevenue = Math.round(projectedStats.projectedValue * product.price);
+  
+  // Calculate growth rate based on actual graph data
+  const growthRate = projectedStats.lastValue > 0 
+    ? Math.round((projectedStats.projectedValue - projectedStats.lastValue) / projectedStats.lastValue * 100)
+    : 0;
+
+  // Calculate market share change based on actual data
+  const marketShareChange = projectedStats.totalChange > 0 
+    ? Math.round((projectedStats.avgDailyChange / projectedStats.lastValue) * 100)
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] relative">
@@ -145,7 +169,8 @@ const ProductPage = () => {
               <SalesGraph 
                 curr={product.sold_today} 
                 prev={product.sold_1_month_ago} 
-                listVel={product.list_velocity} 
+                listVel={product.list_velocity}
+                onProjectionUpdate={handleProjectionUpdate}
               />
             </div>
 
@@ -158,38 +183,51 @@ const ProductPage = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Revenue (30d)</span>
-                    <span className="text-xl font-semibold text-foreground">$23,492</span>
+                    <span className="text-xl font-semibold text-foreground">
+                      ${projectedRevenue}
+                    </span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: '75%' }} />
+                    <div className="h-full bg-primary transition-all" 
+                      style={{ width: `${Math.min(100, Math.abs(growthRate))}%` }} 
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Growth Rate</span>
-                    <span className="text-xl font-semibold text-green-500">+24.3%</span>
+                    <span className={`text-xl font-semibold ${growthRate >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {growthRate}%
+                    </span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500" style={{ width: '65%' }} />
+                    <div className={`h-full transition-all ${growthRate >= 0 ? 'bg-green-500' : 'bg-red-500'}`}
+                      style={{ width: `${Math.min(100, Math.abs(growthRate))}%` }} 
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Market Share</span>
-                    <span className="text-xl font-semibold text-primary">12.8%</span>
+                    <span className={`text-xl font-semibold ${marketShareChange >= 0 ? 'text-primary' : 'text-red-500'}`}>
+                      {marketShareChange}%
+                    </span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: '45%' }} />
+                    <div className={`h-full transition-all ${marketShareChange >= 0 ? 'bg-primary' : 'bg-red-500'}`}
+                      style={{ width: `${Math.min(100, Math.abs(marketShareChange))}%` }} 
+                    />
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-border">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Trend Confidence</span>
-                    <span className="px-2 py-1 text-xs font-medium text-primary-foreground bg-primary rounded-full">
-                      High
+                    <span className={`px-2 py-1 text-xs font-medium text-primary-foreground 
+                      ${Math.abs(growthRate) > 20 ? 'bg-primary' : 'bg-muted'} rounded-full`}>
+                      {Math.abs(growthRate) > 20 ? 'High' : 'Moderate'}
                     </span>
                   </div>
                 </div>
