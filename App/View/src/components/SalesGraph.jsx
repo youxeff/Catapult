@@ -23,20 +23,34 @@ const SalesGraph = () => {
       y: db_data.prev/30.0 + i*(db_data.curr - db_data.prev/30.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0, // Random y-value around current value
     });
   }
+  data.push({
+    x: 30,
+    y2: db_data.curr,
+  });
   for (let i = 1; i <= 7; i++) {
     data.push({
       x: i + 30,
-      y: db_data.curr + Math.max(i*db_data.curr*(1 + Math.pow(db_data.listVel, 3) / 3.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0, 0), // Random y-value around current value
+      y2: db_data.curr + Math.max(i*db_data.curr*(1 + Math.pow(db_data.listVel, 3) / 3.0) + ((Math.random() * 2) - 1) * db_data.prev / 2.0, 0), // Random y-value around current value
     });
   }
   return (
     <ResponsiveContainer width="100%" height={400}>
       <LineChart data={data}>
         <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-        <XAxis dataKey="x" />
-        <YAxis />
         <Tooltip />
+        <text
+          x={200}
+          y={20}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          style={{ fontSize: 18, fontWeight: "bold" }}
+        >
+          Sales Performance Graph
+        </text>
+        <XAxis dataKey="x" label={{ value: "Days", position: "insideBottom", offset: -5 }} />
+        <YAxis label={{ value: "Interest", angle: -90, position: "insideLeft" }} />
         <Line type="linear" dataKey="y" stroke="#8884d8" strokeWidth={2} />
+        <Line type="linear" dataKey="y2" strokeDasharray="4 4" stroke={data[36].y2 - data[29].y > 0 ? "#59e859" : "#e85859"} strokeWidth={2} />
 
         {/* Vertical Dotted Lines */}
         {verticalLines.map((xValue, index) => (
