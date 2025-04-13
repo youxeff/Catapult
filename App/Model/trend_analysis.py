@@ -9,6 +9,7 @@ from scipy.stats import norm
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
+import requests
 
 # Instantiate the client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -18,11 +19,19 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Sample simulated trend data
 SAMPLE_TREND_DATA = {
-    "google": ["ashwagandha", "gut health", "sleep gummies"],
-    "exploding": ["magnesium glycinate", "green powders", "electrolyte drink"],
-    "tiktok": ["wellness shots", "coregreens", "adaptogen stack"]
+    "google": [],
 }
-
+def get_google_suggestions(query, max_results=20):
+    try:
+        url = "https://suggestqueries.google.com/complete/search"
+        params = {"client": "firefox", "q": query}
+        response = requests.get(url, params=params)
+        suggestions = response.json()[1]
+        SAMPLE_TREND_DATA["google"] =suggestions[:max_results]
+    except Exception as e:
+        print(f"[Google Suggest Error] {e}")
+        SAMPLE_TREND_DATA["google"] = []
+    
 # Keyword-source mapping
 def extract_keywords_with_sources(trend_data):
     keyword_sources = {}
@@ -51,8 +60,7 @@ def group_keywords_with_llm(user_query, trend_data):
     A user searched: '{user_query}'.
     Here are keywords from 3 trend sources:
     Google Trends: {trend_data['google']}
-    Exploding Topics: {trend_data['exploding']}
-    TikTok: {trend_data['tiktok']}
+
 
     Group the keywords into meaningful product-related clusters.
     Return output as JSON with groups and their keywords.
@@ -66,7 +74,7 @@ def group_keywords_with_llm(user_query, trend_data):
 # Main analysis
 def analyze_trends():
     user_query = "trending health products"
-
+    get_google_suggestions(user_query, max_results=20)
     keyword_sources = extract_keywords_with_sources(SAMPLE_TREND_DATA)
     all_keywords = list(keyword_sources.keys())
 
