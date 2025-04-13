@@ -30,10 +30,11 @@ def get_products():
             'price': float(p.sell_price) if p.sell_price else None,
             'supplier': p.supplier,
             'rating': float(p.rating) if p.rating else None,
-            'lastUpdated': p.scraped_at.isoformat() if p.scraped_at else None
+            'lastUpdated': p.scraped_at.isoformat() if p.scraped_at else None,
+            'imageUrl': p.image_url or "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600"  # Use actual image_url with fallback
         } for p in products])
     except Exception as e:
-        print(f"Error in get_products: {str(e)}")  # Add debugging
+        print(f"Error in get_products: {str(e)}")
         return jsonify({'error': str(e)}), 500
     finally:
         db.close()
@@ -51,7 +52,8 @@ def get_products_by_category(category_id):
             'price': float(p.sell_price) if p.sell_price else None,
             'supplier': p.supplier,
             'rating': float(p.rating) if p.rating else None,
-            'lastUpdated': p.scraped_at.isoformat() if p.scraped_at else None
+            'lastUpdated': p.scraped_at.isoformat() if p.scraped_at else None,
+            'imageUrl': p.image_url or "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600"  # Use actual image_url with fallback
         } for p in products])
     except Exception as e:
         return jsonify({'error': str(e)}), 500

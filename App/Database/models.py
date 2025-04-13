@@ -13,3 +13,4 @@ class TiktokProduct(Base):
     supplier = Column(String(100), nullable=True)
     rating = Column(DECIMAL(2,1), nullable=True)
     scraped_at = Column(DateTime, nullable=True, default=datetime.utcnow)
+    image_url = Column(String(512), nullable=True)  # Added image_url field

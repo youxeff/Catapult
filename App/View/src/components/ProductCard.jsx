@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, sold_today, sold_1_month_ago, list_velocity }) => {
+const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, sold_today, sold_1_month_ago, list_velocity, imageUrl }) => {
   const navigate = useNavigate();
   
   if (!name) return null;
@@ -13,7 +13,7 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, sold_toda
         name, 
         description: `A ${name} from ${supplier}`,
         priceRange: `$${price?.toFixed(2)}`,
-        image: "https://via.placeholder.com/400",
+        image: imageUrl, // Remove fallback here since we'll handle it in the img tag
         trendScore: rating ? rating * 20 : 0,
         category: supplier,
         sellers: [supplier],
@@ -23,12 +23,14 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, sold_toda
         sold_today,
         sold_1_month_ago,
         list_velocity,
+        imageUrl
       } 
     });
   };
 
   const ratingPercentage = typeof rating === 'number' ? (rating * 20) : 0;
   const formattedPrice = price?.toFixed(2) || 'Price unavailable';
+  const placeholderImage = "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600";
 
   return (
     <div 
@@ -47,10 +49,14 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, sold_toda
       {/* Image Container */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img
-          src="https://via.placeholder.com/400"
+          src={imageUrl || placeholderImage}
           alt={name}
           className="w-full h-full object-cover object-center
             group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            e.target.onerror = null; // Prevent infinite loop
+            e.target.src = placeholderImage;
+          }}
         />
         {rating && rating >= 4.5 && (
           <div className="absolute top-2 left-2 bg-primary text-primary-foreground 
