@@ -6,8 +6,16 @@ const ProductPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
-  const placeholderImage =
-    "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600";
+  const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [projectedStats, setProjectedStats] = useState({
+    lastValue: 0,
+    projectedValue: 0,
+    avgDailyChange: 0,
+    totalChange: 0
+  });
+  
+  const placeholderImage = "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600";
   const product = location.state || {
     id: id,
     name: "Product Not Found",
@@ -42,6 +50,30 @@ const ProductPage = () => {
       month: "long",
       day: "numeric",
     });
+  };
+
+  // Calculate projected revenue for next 30 days based on graph data
+  const projectedRevenue = Math.round(projectedStats.projectedValue * product.price);
+  
+  // Calculate growth rate based on actual graph data
+  const growthRate = projectedStats.lastValue > 0 
+    ? Math.round((projectedStats.projectedValue - projectedStats.lastValue) / projectedStats.lastValue * 100)
+    : 0;
+
+  // Calculate market share change based on actual data
+  const marketShareChange = projectedStats.totalChange > 0 
+    ? Math.round((projectedStats.avgDailyChange / projectedStats.lastValue) * 100)
+    : 0;
+
+  const handleImageError = (e) => {
+    console.warn(`Failed to load image for product: ${product.name}`);
+    setImageError(true);
+    setIsLoading(false);
+    e.target.src = placeholderImage;
+  };
+
+  const handleImageLoad = () => {
+    setIsLoading(false);
   };
 
   return (
@@ -84,15 +116,18 @@ const ProductPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left Column - Image */}
             <div className="space-y-4">
-              <div className="aspect-square rounded-xl overflow-hidden bg-muted">
+              <div className="relative aspect-square rounded-xl overflow-hidden bg-muted">
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  </div>
+                )}
                 <img
-                  src={product.imageUrl || placeholderImage}
+                  src={imageError ? placeholderImage : (product.imageUrl || placeholderImage)}
                   alt={product.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.onerror = null; // Prevent infinite loop
-                    e.target.src = placeholderImage;
-                  }}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                  onError={handleImageError}
+                  onLoad={handleImageLoad}
                 />
               </div>
             </div>

@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl, description,sold_today,sold_1_month_ago,list_velocity }) => {
+const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl, description, sold_today, sold_1_month_ago, list_velocity }) => {
   const navigate = useNavigate();
+  const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const placeholderImage = "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600";
   
   if (!name) return null;
 
@@ -15,7 +18,7 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl,
         supplier,
         rating,
         lastUpdated,
-        imageUrl,
+        imageUrl: imageError ? placeholderImage : imageUrl,
         description,
         sold_today,
         sold_1_month_ago,
@@ -24,9 +27,19 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl,
     });
   };
 
+  const handleImageError = (e) => {
+    console.warn(`Failed to load image for product: ${name}`);
+    setImageError(true);
+    setIsLoading(false);
+    e.target.src = placeholderImage;
+  };
+
+  const handleImageLoad = () => {
+    setIsLoading(false);
+  };
+
   const ratingPercentage = typeof rating === 'number' ? (rating * 20) : 0;
   const formattedPrice = price?.toFixed(2) || 'Price unavailable';
-  const placeholderImage = "https://images.pexels.com/photos/4464482/pexels-photo-4464482.jpeg?auto=compress&cs=tinysrgb&w=1600";
 
   return (
     <div 
@@ -44,15 +57,21 @@ const ProductCard = ({ id, name, price, supplier, rating, lastUpdated, imageUrl,
     >
       {/* Image Container */}
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+        )}
         <img
-          src={imageUrl || placeholderImage}
+          src={imageError ? placeholderImage : (imageUrl || placeholderImage)}
           alt={name}
-          className="w-full h-full object-cover object-center
-            group-hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            e.target.onerror = null; // Prevent infinite loop
-            e.target.src = placeholderImage;
-          }}
+          className={`
+            w-full h-full object-cover object-center
+            group-hover:scale-105 transition-transform duration-300
+            ${isLoading ? 'opacity-0' : 'opacity-100'}
+          `}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
         />
         {rating && rating >= 4.5 && (
           <div className="absolute top-2 left-2 bg-primary text-primary-foreground 
